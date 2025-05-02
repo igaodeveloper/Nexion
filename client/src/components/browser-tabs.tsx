@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { X, Plus, Home, LayoutDashboard, FileText, CalendarDays, MessageCircle } from 'lucide-react';
-import { useLocation } from 'wouter';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  X,
+  Plus,
+  Home,
+  LayoutDashboard,
+  FileText,
+  CalendarDays,
+  MessageCircle,
+} from "lucide-react";
+import { useLocation } from "wouter";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Document, User } from '@shared/schema';
-import { useQuery } from '@tanstack/react-query';
+} from "@/components/ui/dropdown-menu";
+import { Document, User } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 
 export interface Tab {
   id: string;
@@ -27,7 +35,7 @@ interface BrowserTabsProps {
   onTabChange?: (tab: Tab) => void;
 }
 
-const STORAGE_KEY = 'nexion_browser_tabs';
+const STORAGE_KEY = "nexion_browser_tabs";
 
 export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
   const [location, setLocation] = useLocation();
@@ -37,14 +45,32 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
 
   // Fetch recent documents
   const { data: recentDocuments } = useQuery<Document[]>({
-    queryKey: ['/api/documents/recent'],
+    queryKey: ["/api/documents/recent"],
   });
 
   // Default tabs
   const defaultTabs: Tab[] = [
-    { id: 'dashboard', title: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, path: '/', closable: false },
-    { id: 'calendar', title: 'Calendário', icon: <CalendarDays className="h-4 w-4" />, path: '/calendar', closable: true },
-    { id: 'messages', title: 'Mensagens', icon: <MessageCircle className="h-4 w-4" />, path: '/messages', closable: true },
+    {
+      id: "dashboard",
+      title: "Dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      path: "/",
+      closable: false,
+    },
+    {
+      id: "calendar",
+      title: "Calendário",
+      icon: <CalendarDays className="h-4 w-4" />,
+      path: "/calendar",
+      closable: true,
+    },
+    {
+      id: "messages",
+      title: "Mensagens",
+      icon: <MessageCircle className="h-4 w-4" />,
+      path: "/messages",
+      closable: true,
+    },
   ];
 
   // Initialize tabs
@@ -53,30 +79,32 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
     if (savedTabs) {
       try {
         const parsedTabs = JSON.parse(savedTabs);
-        
+
         // Convert saved tabs to Tab objects with React nodes
         const restoredTabs = parsedTabs.map((tab: any) => {
           // Restore icon based on path or type
           let icon;
-          if (tab.path === '/') {
+          if (tab.path === "/") {
             icon = <LayoutDashboard className="h-4 w-4" />;
-          } else if (tab.path.startsWith('/documents/')) {
+          } else if (tab.path.startsWith("/documents/")) {
             icon = <FileText className="h-4 w-4" />;
-          } else if (tab.path === '/calendar') {
+          } else if (tab.path === "/calendar") {
             icon = <CalendarDays className="h-4 w-4" />;
-          } else if (tab.path === '/messages') {
+          } else if (tab.path === "/messages") {
             icon = <MessageCircle className="h-4 w-4" />;
           } else {
             icon = <FileText className="h-4 w-4" />;
           }
-          
+
           return { ...tab, icon };
         });
-        
+
         setTabs(restoredTabs);
-        
+
         // Find active tab based on current location
-        const currentTab = restoredTabs.find((tab: Tab) => tab.path === location);
+        const currentTab = restoredTabs.find(
+          (tab: Tab) => tab.path === location,
+        );
         if (currentTab) {
           setActiveTabId(currentTab.id);
         } else {
@@ -84,14 +112,14 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
           handleAddTab(location);
         }
       } catch (error) {
-        console.error('Error parsing saved tabs:', error);
+        console.error("Error parsing saved tabs:", error);
         setTabs(defaultTabs);
-        setActiveTabId('dashboard');
+        setActiveTabId("dashboard");
       }
     } else {
       // No saved tabs, use defaults
       setTabs(defaultTabs);
-      setActiveTabId('dashboard');
+      setActiveTabId("dashboard");
     }
   }, []);
 
@@ -106,45 +134,49 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
 
   // Update active tab when location changes
   useEffect(() => {
-    const currentTab = tabs.find(tab => tab.path === location);
+    const currentTab = tabs.find((tab) => tab.path === location);
     if (currentTab) {
       setActiveTabId(currentTab.id);
-    } else if (location !== '/' && location !== '/login' && location !== '/register') {
+    } else if (
+      location !== "/" &&
+      location !== "/login" &&
+      location !== "/register"
+    ) {
       // Add new tab for new locations (except some special pages)
       handleAddTab(location);
     }
   }, [location, tabs]);
 
-  const handleAddTab = (path: string = '/') => {
+  const handleAddTab = (path: string = "/") => {
     // Default title and icon
-    let title = 'Nova Aba';
+    let title = "Nova Aba";
     let icon = <FileText className="h-4 w-4" />;
     let documentId;
 
     // Handle document paths
-    if (path.startsWith('/documents/')) {
-      const id = parseInt(path.split('/').pop() || '0');
+    if (path.startsWith("/documents/")) {
+      const id = parseInt(path.split("/").pop() || "0");
       documentId = id;
-      
+
       // Try to find document title
       if (recentDocuments) {
-        const document = recentDocuments.find(doc => doc.id === id);
+        const document = recentDocuments.find((doc) => doc.id === id);
         if (document) {
           title = document.title;
         } else {
-          title = 'Documento';
+          title = "Documento";
         }
       } else {
-        title = 'Documento';
+        title = "Documento";
       }
-    } else if (path === '/') {
-      title = 'Dashboard';
+    } else if (path === "/") {
+      title = "Dashboard";
       icon = <LayoutDashboard className="h-4 w-4" />;
-    } else if (path === '/calendar') {
-      title = 'Calendário';
+    } else if (path === "/calendar") {
+      title = "Calendário";
       icon = <CalendarDays className="h-4 w-4" />;
-    } else if (path === '/messages') {
-      title = 'Mensagens';
+    } else if (path === "/messages") {
+      title = "Mensagens";
       icon = <MessageCircle className="h-4 w-4" />;
     }
 
@@ -154,13 +186,13 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
       icon,
       path,
       closable: true,
-      documentId
+      documentId,
     };
 
-    setTabs(prev => [...prev, newTab]);
+    setTabs((prev) => [...prev, newTab]);
     setActiveTabId(newTab.id);
     setLocation(path);
-    
+
     if (onTabChange) {
       onTabChange(newTab);
     }
@@ -169,7 +201,7 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
   const handleTabClick = (tab: Tab) => {
     setActiveTabId(tab.id);
     setLocation(tab.path);
-    
+
     if (onTabChange) {
       onTabChange(tab);
     }
@@ -177,23 +209,23 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
 
   const handleCloseTab = (e: React.MouseEvent, tabId: string) => {
     e.stopPropagation();
-    
-    const tabToClose = tabs.find(tab => tab.id === tabId);
+
+    const tabToClose = tabs.find((tab) => tab.id === tabId);
     if (!tabToClose) return;
-    
+
     // Add to recently closed
-    setRecentlyClosedTabs(prev => [tabToClose, ...prev.slice(0, 9)]);
-    
+    setRecentlyClosedTabs((prev) => [tabToClose, ...prev.slice(0, 9)]);
+
     // Remove the tab
-    const newTabs = tabs.filter(tab => tab.id !== tabId);
+    const newTabs = tabs.filter((tab) => tab.id !== tabId);
     setTabs(newTabs);
-    
+
     // If closing the active tab, activate another one
     if (activeTabId === tabId && newTabs.length > 0) {
       const newActiveTab = newTabs[newTabs.length - 1];
       setActiveTabId(newActiveTab.id);
       setLocation(newActiveTab.path);
-      
+
       if (onTabChange) {
         onTabChange(newActiveTab);
       }
@@ -201,42 +233,49 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
   };
 
   const handleReopenTab = (tab: Tab) => {
-    setTabs(prev => [...prev, tab]);
+    setTabs((prev) => [...prev, tab]);
     setActiveTabId(tab.id);
     setLocation(tab.path);
-    setRecentlyClosedTabs(prev => prev.filter(t => t.id !== tab.id));
-    
+    setRecentlyClosedTabs((prev) => prev.filter((t) => t.id !== tab.id));
+
     if (onTabChange) {
       onTabChange(tab);
     }
   };
 
   return (
-    <div className="flex items-center border-b bg-card overflow-x-auto">
+    <div className="flex items-center border-b border-border bg-card overflow-x-auto custom-scrollbar w-full">
       <div className="flex-1 flex items-center">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <div
             key={tab.id}
             className={cn(
-              "flex items-center min-w-40 max-w-60 px-3 py-2 border-r border-border",
-              "hover:bg-accent/50 cursor-pointer",
-              activeTabId === tab.id ? "bg-accent/50" : "bg-transparent"
+              "flex items-center h-10 min-w-[160px] max-w-[240px] px-3 py-2 border-r border-border",
+              "hover:bg-accent/50 cursor-pointer transition-colors duration-200",
+              activeTabId === tab.id
+                ? "bg-accent/50 text-accent-foreground border-b-2 border-b-primary"
+                : "bg-transparent border-b-2 border-b-transparent",
             )}
             onClick={() => handleTabClick(tab)}
           >
             <div className="flex items-center gap-2 flex-1 overflow-hidden">
-              {tab.favicon ? (
-                <img src={tab.favicon} alt="" className="h-4 w-4" />
-              ) : tab.icon}
-              <span className="truncate">{tab.title}</span>
+              <span className="shrink-0">
+                {tab.favicon ? (
+                  <img src={tab.favicon} alt="" className="h-4 w-4" />
+                ) : (
+                  tab.icon
+                )}
+              </span>
+              <span className="truncate text-sm font-medium">{tab.title}</span>
             </div>
-            
+
             {tab.closable && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-5 w-5 ml-2 opacity-50 hover:opacity-100 hover:bg-accent" 
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 ml-2 opacity-50 hover:opacity-100 hover:bg-accent rounded-full"
                 onClick={(e) => handleCloseTab(e, tab.id)}
+                aria-label={`Fechar aba ${tab.title}`}
               >
                 <X className="h-3 w-3" />
               </Button>
@@ -244,49 +283,64 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
           </div>
         ))}
       </div>
-      
-      <div className="flex items-center">
+
+      <div className="flex items-center pl-1 pr-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <Plus className="h-5 w-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              aria-label="Adicionar nova aba"
+            >
+              <Plus className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60">
-            <DropdownMenuItem onClick={() => handleAddTab('/')}>
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              <span>Dashboard</span>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuItem
+              className="cursor-pointer flex items-center gap-2"
+              onClick={() => handleAddTab("/")}
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              <span>Nova aba: Dashboard</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAddTab('/calendar')}>
-              <CalendarDays className="h-4 w-4 mr-2" />
-              <span>Calendário</span>
+            <DropdownMenuItem
+              className="cursor-pointer flex items-center gap-2"
+              onClick={() => handleAddTab("/calendar")}
+            >
+              <CalendarDays className="h-4 w-4" />
+              <span>Nova aba: Calendário</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleAddTab('/messages')}>
-              <MessageCircle className="h-4 w-4 mr-2" />
-              <span>Mensagens</span>
+            <DropdownMenuItem
+              className="cursor-pointer flex items-center gap-2"
+              onClick={() => handleAddTab("/messages")}
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span>Nova aba: Mensagens</span>
             </DropdownMenuItem>
-            
-            {recentDocuments && recentDocuments.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <div className="px-2 py-1 text-xs text-muted-foreground">Documentos Recentes</div>
-                {recentDocuments.slice(0, 5).map(doc => (
-                  <DropdownMenuItem key={doc.id} onClick={() => handleAddTab(`/documents/${doc.id}`)}>
-                    <div className="mr-2 text-lg">{doc.emoji || '📄'}</div>
-                    <span className="truncate">{doc.title}</span>
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
-            
+
             {recentlyClosedTabs.length > 0 && (
               <>
                 <DropdownMenuSeparator />
-                <div className="px-2 py-1 text-xs text-muted-foreground">Abas Fechadas Recentemente</div>
-                {recentlyClosedTabs.slice(0, 5).map(tab => (
-                  <DropdownMenuItem key={tab.id} onClick={() => handleReopenTab(tab)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    <span className="truncate">{tab.title}</span>
+                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                  Abas recentemente fechadas
+                </div>
+                {recentlyClosedTabs.slice(0, 5).map((tab) => (
+                  <DropdownMenuItem
+                    key={tab.id}
+                    className="cursor-pointer flex items-center gap-2 truncate"
+                    onClick={() => handleReopenTab(tab)}
+                  >
+                    {tab.favicon ? (
+                      <img
+                        src={tab.favicon}
+                        alt=""
+                        className="h-4 w-4 shrink-0"
+                      />
+                    ) : (
+                      tab.icon
+                    )}
+                    <span className="truncate flex-1">{tab.title}</span>
                   </DropdownMenuItem>
                 ))}
               </>
@@ -296,4 +350,4 @@ export function BrowserTabs({ onTabChange }: BrowserTabsProps) {
       </div>
     </div>
   );
-} 
+}

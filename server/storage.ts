@@ -1,13 +1,22 @@
-import { 
-  User, InsertUser, 
-  Organization, InsertOrganization, 
-  OrganizationMember, InsertOrganizationMember, 
-  Board, InsertBoard, 
-  Task, InsertTask, 
-  Project, InsertProject, 
-  Session, InsertSession,
-  TaskUpdate, InsertTaskUpdate,
-  Document, InsertDocument
+import {
+  User,
+  InsertUser,
+  Organization,
+  InsertOrganization,
+  OrganizationMember,
+  InsertOrganizationMember,
+  Board,
+  InsertBoard,
+  Task,
+  InsertTask,
+  Project,
+  InsertProject,
+  Session,
+  InsertSession,
+  TaskUpdate,
+  InsertTaskUpdate,
+  Document,
+  InsertDocument,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -17,16 +26,20 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<User>): Promise<User | undefined>;
-  
+
   // Organization operations
   getOrganization(id: number): Promise<Organization | undefined>;
   getOrganizationsByUser(userId: number): Promise<Organization[]>;
   createOrganization(org: InsertOrganization): Promise<Organization>;
-  
+
   // Organization members
-  getOrganizationMembers(orgId: number): Promise<(OrganizationMember & { user: User })[]>;
-  addOrganizationMember(member: InsertOrganizationMember): Promise<OrganizationMember>;
-  
+  getOrganizationMembers(
+    orgId: number,
+  ): Promise<(OrganizationMember & { user: User })[]>;
+  addOrganizationMember(
+    member: InsertOrganizationMember,
+  ): Promise<OrganizationMember>;
+
   // Board operations
   getBoard(id: number): Promise<Board | undefined>;
   getBoardsByOrganization(orgId: number): Promise<Board[]>;
@@ -34,14 +47,14 @@ export interface IStorage {
   getFavoriteBoards(userId: number): Promise<Board[]>;
   createBoard(board: InsertBoard): Promise<Board>;
   updateBoard(id: number, data: Partial<Board>): Promise<Board | undefined>;
-  
+
   // Task operations
   getTask(id: number): Promise<Task | undefined>;
   getTasksByBoard(boardId: number): Promise<Task[]>;
   getTasksByAssignee(userId: number): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, data: Partial<Task>): Promise<Task | undefined>;
-  
+
   // Document operations
   getDocument(id: number): Promise<Document | undefined>;
   getDocumentsByOrganization(orgId: number): Promise<Document[]>;
@@ -49,19 +62,24 @@ export interface IStorage {
   getFavoriteDocuments(userId: number): Promise<Document[]>;
   getStarredDocuments(userId: number): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
-  updateDocument(id: number, data: Partial<Document>): Promise<Document | undefined>;
-  
+  updateDocument(
+    id: number,
+    data: Partial<Document>,
+  ): Promise<Document | undefined>;
+
   // Project operations
   getProject(id: number): Promise<Project | undefined>;
   getProjectsByOrganization(orgId: number): Promise<Project[]>;
   createProject(project: InsertProject): Promise<Project>;
-  
+
   // Session operations
   createSession(session: InsertSession): Promise<Session>;
   getSessionsByUser(userId: number): Promise<Session[]>;
-  
+
   // Task updates
-  getTaskUpdates(limit: number): Promise<(TaskUpdate & { user: User, task: Task })[]>;
+  getTaskUpdates(
+    limit: number,
+  ): Promise<(TaskUpdate & { user: User; task: Task })[]>;
   createTaskUpdate(update: InsertTaskUpdate): Promise<TaskUpdate>;
 }
 
@@ -75,7 +93,7 @@ export class MemStorage implements IStorage {
   private sessions: Map<number, Session>;
   private taskUpdates: Map<number, TaskUpdate>;
   private documents: Map<number, Document>;
-  
+
   private userIdCounter: number;
   private orgIdCounter: number;
   private memberIdCounter: number;
@@ -96,7 +114,7 @@ export class MemStorage implements IStorage {
     this.sessions = new Map();
     this.taskUpdates = new Map();
     this.documents = new Map();
-    
+
     this.userIdCounter = 1;
     this.orgIdCounter = 1;
     this.memberIdCounter = 1;
@@ -106,7 +124,7 @@ export class MemStorage implements IStorage {
     this.sessionIdCounter = 1;
     this.updateIdCounter = 1;
     this.documentIdCounter = 1;
-    
+
     // Initialize with some sample data
     this.initializeSampleData();
   }
@@ -120,99 +138,101 @@ export class MemStorage implements IStorage {
       username: "jeanjr",
       email: "jeanjr@email.com",
       password: "$2a$10$VGcg4aqT2qnpQK.C9rpFJeRbVQlwimLqaABx6XlMu6oqRAlXMPj0y", // "password123"
-      phone: null
+      phone: null,
     };
-    
+
     this.users.set(user.id, user);
-    
+
     // Create organization
     const organization: Organization = {
       id: this.orgIdCounter++,
       name: "Company Name",
       description: "A collaborative workspace for our team",
-      createdBy: user.id
+      createdBy: user.id,
     };
-    
+
     this.organizations.set(organization.id, organization);
-    
+
     // Add user as organization member
     const member: OrganizationMember = {
       id: this.memberIdCounter++,
       organizationId: organization.id,
       userId: user.id,
-      role: "admin"
+      role: "admin",
     };
-    
+
     this.organizationMembers.set(member.id, member);
-    
+
     // Create project
     const project: Project = {
       id: this.projectIdCounter++,
       name: "Friday Flow",
-      organizationId: organization.id
+      organizationId: organization.id,
     };
-    
+
     this.projects.set(project.id, project);
-    
+
     // Create boards
     const board1: Board = {
       id: this.boardIdCounter++,
       name: "Backend",
       organizationId: organization.id,
       createdBy: user.id,
-      isFavorite: true
+      isFavorite: true,
     };
-    
+
     const board2: Board = {
       id: this.boardIdCounter++,
       name: "Frontend",
       organizationId: organization.id,
       createdBy: user.id,
-      isFavorite: true
+      isFavorite: true,
     };
-    
+
     const board3: Board = {
       id: this.boardIdCounter++,
       name: "DevOps",
       organizationId: organization.id,
       createdBy: user.id,
-      isFavorite: false
+      isFavorite: false,
     };
-    
+
     this.boards.set(board1.id, board1);
     this.boards.set(board2.id, board2);
     this.boards.set(board3.id, board3);
-    
+
     // Create tasks
     const task1: Task = {
       id: this.taskIdCounter++,
       title: "Desenvolver notas de usuários",
-      description: "Desenvolver notas de usuários. Lorem ipsum is simply dummy text of...",
+      description:
+        "Desenvolver notas de usuários. Lorem ipsum is simply dummy text of...",
       status: "pending",
       priority: "alta",
       assignedTo: user.id,
       boardId: board1.id,
       projectId: project.id,
       dueDate: "12/12/12",
-      completed: false
+      completed: false,
     };
-    
+
     const task2: Task = {
       id: this.taskIdCounter++,
       title: "Refatorar notas de autenticação",
-      description: "Desenvolver notas de usuários. Lorem ipsum is simply dummy text of...",
+      description:
+        "Desenvolver notas de usuários. Lorem ipsum is simply dummy text of...",
       status: "complete",
       priority: "media",
       assignedTo: user.id,
       boardId: board1.id,
       projectId: project.id,
       dueDate: "12/12/12",
-      completed: true
+      completed: true,
     };
-    
+
     this.tasks.set(task1.id, task1);
     this.tasks.set(task2.id, task2);
-    
+
     // Create task updates
     const update1: TaskUpdate = {
       id: this.updateIdCounter++,
@@ -220,31 +240,31 @@ export class MemStorage implements IStorage {
       userId: user.id,
       oldStatus: "in_progress",
       newStatus: "complete",
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     const update2: TaskUpdate = {
       id: this.updateIdCounter++,
       taskId: task2.id,
       userId: user.id,
       oldStatus: "in_progress",
       newStatus: "complete",
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000)
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
     };
-    
+
     const update3: TaskUpdate = {
       id: this.updateIdCounter++,
       taskId: task2.id,
       userId: user.id,
       oldStatus: "in_progress",
       newStatus: "complete",
-      timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000)
+      timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000),
     };
-    
+
     this.taskUpdates.set(update1.id, update1);
     this.taskUpdates.set(update2.id, update2);
     this.taskUpdates.set(update3.id, update3);
-    
+
     // Create session
     const session: Session = {
       id: this.sessionIdCounter++,
@@ -252,61 +272,64 @@ export class MemStorage implements IStorage {
       device: "Windows Chrome",
       location: "Campina Grande",
       ipAddress: "224.54.96.47/5=416:88/41:...",
-      timestamp: new Date()
+      timestamp: new Date(),
     };
-    
+
     this.sessions.set(session.id, session);
-    
+
     // Create a sample document
     const document: Document = {
       id: this.documentIdCounter++,
       title: "Bem-vindo ao NotionFlow",
       emoji: "👋",
-      coverImage: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
+      coverImage:
+        "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
       icon: null,
       blocks: JSON.stringify([
         {
           id: `block-${Date.now()}-1`,
           type: "heading-1",
           content: "Bem-vindo ao NotionFlow",
-          children: []
+          children: [],
         },
         {
           id: `block-${Date.now()}-2`,
           type: "paragraph",
-          content: "Este é um exemplo de documento usando nosso editor de blocos. Você pode editar este documento clicando em qualquer parte do texto.",
-          children: []
+          content:
+            "Este é um exemplo de documento usando nosso editor de blocos. Você pode editar este documento clicando em qualquer parte do texto.",
+          children: [],
         },
         {
           id: `block-${Date.now()}-3`,
           type: "heading-2",
           content: "O que você pode fazer",
-          children: []
+          children: [],
         },
         {
           id: `block-${Date.now()}-4`,
           type: "bullet-list",
           content: "Criar listas como esta",
-          children: []
+          children: [],
         },
         {
           id: `block-${Date.now()}-5`,
           type: "bullet-list",
           content: "Adicionar vários tipos de blocos",
-          children: []
+          children: [],
         },
         {
           id: `block-${Date.now()}-6`,
           type: "bullet-list",
           content: "Organizar seu conteúdo",
-          children: []
+          children: [],
         },
         {
           id: `block-${Date.now()}-7`,
           type: "paragraph",
-          content: "Para adicionar um novo bloco, pressione Enter ou clique no botão '+' que aparece quando você passa o mouse sobre o espaço entre os blocos.",
-          children: []
-        }
+          content:
+            "Para adicionar um novo bloco, pressione Enter ou clique no botão '+' que aparece quando você passa o mouse sobre o espaço entre os blocos.",
+          children: [],
+        },
       ]),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -314,9 +337,9 @@ export class MemStorage implements IStorage {
       organizationId: organization.id,
       parentId: null,
       isStarred: true,
-      isFavorite: true
+      isFavorite: true,
     };
-    
+
     this.documents.set(document.id, document);
   }
 
@@ -326,19 +349,21 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    return Array.from(this.users.values()).find((user) => user.email === email);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
   }
 
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const newUser: User = { 
-      ...user, 
+    const newUser: User = {
+      ...user,
       id,
-      phone: user.phone || null 
+      phone: user.phone || null,
     };
     this.users.set(id, newUser);
     return newUser;
@@ -347,7 +372,7 @@ export class MemStorage implements IStorage {
   async updateUser(id: number, data: Partial<User>): Promise<User | undefined> {
     const user = this.users.get(id);
     if (!user) return undefined;
-    
+
     const updatedUser = { ...user, ...data };
     this.users.set(id, updatedUser);
     return updatedUser;
@@ -360,41 +385,47 @@ export class MemStorage implements IStorage {
 
   async getOrganizationsByUser(userId: number): Promise<Organization[]> {
     const memberIds = Array.from(this.organizationMembers.values())
-      .filter(member => member.userId === userId)
-      .map(member => member.organizationId);
-    
-    return Array.from(this.organizations.values())
-      .filter(org => memberIds.includes(org.id));
+      .filter((member) => member.userId === userId)
+      .map((member) => member.organizationId);
+
+    return Array.from(this.organizations.values()).filter((org) =>
+      memberIds.includes(org.id),
+    );
   }
 
   async createOrganization(org: InsertOrganization): Promise<Organization> {
     const id = this.orgIdCounter++;
-    const organization: Organization = { 
-      ...org, 
+    const organization: Organization = {
+      ...org,
       id,
-      description: org.description || null
+      description: org.description || null,
     };
     this.organizations.set(id, organization);
     return organization;
   }
 
   // Organization members
-  async getOrganizationMembers(orgId: number): Promise<(OrganizationMember & { user: User })[]> {
-    const members = Array.from(this.organizationMembers.values())
-      .filter(member => member.organizationId === orgId);
-    
-    return members.map(member => {
+  async getOrganizationMembers(
+    orgId: number,
+  ): Promise<(OrganizationMember & { user: User })[]> {
+    const members = Array.from(this.organizationMembers.values()).filter(
+      (member) => member.organizationId === orgId,
+    );
+
+    return members.map((member) => {
       const user = this.users.get(member.userId)!;
       return { ...member, user };
     });
   }
 
-  async addOrganizationMember(member: InsertOrganizationMember): Promise<OrganizationMember> {
+  async addOrganizationMember(
+    member: InsertOrganizationMember,
+  ): Promise<OrganizationMember> {
     const id = this.memberIdCounter++;
-    const newMember: OrganizationMember = { 
-      ...member, 
+    const newMember: OrganizationMember = {
+      ...member,
       id,
-      role: member.role || 'member'
+      role: member.role || "member",
     };
     this.organizationMembers.set(id, newMember);
     return newMember;
@@ -406,44 +437,49 @@ export class MemStorage implements IStorage {
   }
 
   async getBoardsByOrganization(orgId: number): Promise<Board[]> {
-    return Array.from(this.boards.values())
-      .filter(board => board.organizationId === orgId);
+    return Array.from(this.boards.values()).filter(
+      (board) => board.organizationId === orgId,
+    );
   }
 
   async getBoardsByUser(userId: number): Promise<Board[]> {
     // Get organizations the user is a member of
     const orgIds = Array.from(this.organizationMembers.values())
-      .filter(member => member.userId === userId)
-      .map(member => member.organizationId);
-    
+      .filter((member) => member.userId === userId)
+      .map((member) => member.organizationId);
+
     // Get boards for those organizations
-    return Array.from(this.boards.values())
-      .filter(board => orgIds.includes(board.organizationId));
+    return Array.from(this.boards.values()).filter((board) =>
+      orgIds.includes(board.organizationId),
+    );
   }
 
   async getFavoriteBoards(userId: number): Promise<Board[]> {
     // Get all boards the user has access to
     const boards = await this.getBoardsByUser(userId);
-    
+
     // Filter to only favorite boards
-    return boards.filter(board => board.isFavorite);
+    return boards.filter((board) => board.isFavorite);
   }
 
   async createBoard(board: InsertBoard): Promise<Board> {
     const id = this.boardIdCounter++;
-    const newBoard: Board = { 
-      ...board, 
+    const newBoard: Board = {
+      ...board,
       id,
-      isFavorite: board.isFavorite !== undefined ? board.isFavorite : null
+      isFavorite: board.isFavorite !== undefined ? board.isFavorite : null,
     };
     this.boards.set(id, newBoard);
     return newBoard;
   }
 
-  async updateBoard(id: number, data: Partial<Board>): Promise<Board | undefined> {
+  async updateBoard(
+    id: number,
+    data: Partial<Board>,
+  ): Promise<Board | undefined> {
     const board = this.boards.get(id);
     if (!board) return undefined;
-    
+
     const updatedBoard = { ...board, ...data };
     this.boards.set(id, updatedBoard);
     return updatedBoard;
@@ -455,27 +491,29 @@ export class MemStorage implements IStorage {
   }
 
   async getTasksByBoard(boardId: number): Promise<Task[]> {
-    return Array.from(this.tasks.values())
-      .filter(task => task.boardId === boardId);
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.boardId === boardId,
+    );
   }
 
   async getTasksByAssignee(userId: number): Promise<Task[]> {
-    return Array.from(this.tasks.values())
-      .filter(task => task.assignedTo === userId);
+    return Array.from(this.tasks.values()).filter(
+      (task) => task.assignedTo === userId,
+    );
   }
 
   async createTask(task: InsertTask): Promise<Task> {
     const id = this.taskIdCounter++;
-    const newTask: Task = { 
-      ...task, 
+    const newTask: Task = {
+      ...task,
       id,
-      status: task.status || 'todo',
+      status: task.status || "todo",
       description: task.description || null,
-      priority: task.priority || 'medium',
+      priority: task.priority || "medium",
       assignedTo: task.assignedTo || null,
       projectId: task.projectId || null,
       dueDate: task.dueDate || null,
-      completed: task.completed || null
+      completed: task.completed || null,
     };
     this.tasks.set(id, newTask);
     return newTask;
@@ -484,7 +522,7 @@ export class MemStorage implements IStorage {
   async updateTask(id: number, data: Partial<Task>): Promise<Task | undefined> {
     const task = this.tasks.get(id);
     if (!task) return undefined;
-    
+
     // If status is changing, create a task update record
     if (data.status && data.status !== task.status) {
       await this.createTaskUpdate({
@@ -492,10 +530,10 @@ export class MemStorage implements IStorage {
         userId: 1, // In a real app, this would be the current user ID
         oldStatus: task.status,
         newStatus: data.status,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
-    
+
     const updatedTask = { ...task, ...data };
     this.tasks.set(id, updatedTask);
     return updatedTask;
@@ -507,8 +545,9 @@ export class MemStorage implements IStorage {
   }
 
   async getProjectsByOrganization(orgId: number): Promise<Project[]> {
-    return Array.from(this.projects.values())
-      .filter(project => project.organizationId === orgId);
+    return Array.from(this.projects.values()).filter(
+      (project) => project.organizationId === orgId,
+    );
   }
 
   async createProject(project: InsertProject): Promise<Project> {
@@ -521,28 +560,31 @@ export class MemStorage implements IStorage {
   // Session operations
   async createSession(session: InsertSession): Promise<Session> {
     const id = this.sessionIdCounter++;
-    const newSession: Session = { 
-      ...session, 
+    const newSession: Session = {
+      ...session,
       id,
       location: session.location || null,
       ipAddress: session.ipAddress || null,
-      timestamp: session.timestamp || new Date()
+      timestamp: session.timestamp || new Date(),
     };
     this.sessions.set(id, newSession);
     return newSession;
   }
 
   async getSessionsByUser(userId: number): Promise<Session[]> {
-    return Array.from(this.sessions.values())
-      .filter(session => session.userId === userId);
+    return Array.from(this.sessions.values()).filter(
+      (session) => session.userId === userId,
+    );
   }
 
   // Task updates
-  async getTaskUpdates(limit: number): Promise<(TaskUpdate & { user: User, task: Task })[]> {
+  async getTaskUpdates(
+    limit: number,
+  ): Promise<(TaskUpdate & { user: User; task: Task })[]> {
     return Array.from(this.taskUpdates.values())
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit)
-      .map(update => {
+      .map((update) => {
         const user = this.users.get(update.userId)!;
         const task = this.tasks.get(update.taskId)!;
         return { ...update, user, task };
@@ -551,12 +593,12 @@ export class MemStorage implements IStorage {
 
   async createTaskUpdate(update: InsertTaskUpdate): Promise<TaskUpdate> {
     const id = this.updateIdCounter++;
-    const newUpdate: TaskUpdate = { 
-      ...update, 
+    const newUpdate: TaskUpdate = {
+      ...update,
       id,
       timestamp: update.timestamp || new Date(),
       oldStatus: update.oldStatus || null,
-      newStatus: update.newStatus || null
+      newStatus: update.newStatus || null,
     };
     this.taskUpdates.set(id, newUpdate);
     return newUpdate;
@@ -568,65 +610,71 @@ export class MemStorage implements IStorage {
   }
 
   async getDocumentsByOrganization(orgId: number): Promise<Document[]> {
-    return Array.from(this.documents.values())
-      .filter(doc => doc.organizationId === orgId);
+    return Array.from(this.documents.values()).filter(
+      (doc) => doc.organizationId === orgId,
+    );
   }
 
   async getDocumentsByUser(userId: number): Promise<Document[]> {
     // Get organizations the user is a member of
     const orgIds = Array.from(this.organizationMembers.values())
-      .filter(member => member.userId === userId)
-      .map(member => member.organizationId);
-    
+      .filter((member) => member.userId === userId)
+      .map((member) => member.organizationId);
+
     // Get documents for those organizations
-    return Array.from(this.documents.values())
-      .filter(doc => orgIds.includes(doc.organizationId));
+    return Array.from(this.documents.values()).filter((doc) =>
+      orgIds.includes(doc.organizationId),
+    );
   }
 
   async getFavoriteDocuments(userId: number): Promise<Document[]> {
     // Get all documents the user has access to
     const documents = await this.getDocumentsByUser(userId);
-    
+
     // Filter to only favorite documents
-    return documents.filter(doc => doc.isFavorite);
+    return documents.filter((doc) => doc.isFavorite);
   }
 
   async getStarredDocuments(userId: number): Promise<Document[]> {
     // Get all documents the user has access to
     const documents = await this.getDocumentsByUser(userId);
-    
+
     // Filter to only starred documents
-    return documents.filter(doc => doc.isStarred);
+    return documents.filter((doc) => doc.isStarred);
   }
 
   async createDocument(document: InsertDocument): Promise<Document> {
     const id = this.documentIdCounter++;
-    const newDocument: Document = { 
-      ...document, 
+    const newDocument: Document = {
+      ...document,
       id,
       // Ensure all required fields are set
       createdAt: new Date(),
       updatedAt: new Date(),
-      isFavorite: document.isFavorite !== undefined ? document.isFavorite : null,
+      isFavorite:
+        document.isFavorite !== undefined ? document.isFavorite : null,
       isStarred: document.isStarred !== undefined ? document.isStarred : null,
       emoji: document.emoji || null,
       coverImage: document.coverImage || null,
       icon: document.icon || null,
-      parentId: document.parentId || null
+      parentId: document.parentId || null,
     };
     this.documents.set(id, newDocument);
     return newDocument;
   }
 
-  async updateDocument(id: number, data: Partial<Document>): Promise<Document | undefined> {
+  async updateDocument(
+    id: number,
+    data: Partial<Document>,
+  ): Promise<Document | undefined> {
     const document = this.documents.get(id);
     if (!document) return undefined;
-    
-    const updatedDocument = { 
-      ...document, 
+
+    const updatedDocument = {
+      ...document,
       ...data,
       // Always update the updatedAt field
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.documents.set(id, updatedDocument);
     return updatedDocument;

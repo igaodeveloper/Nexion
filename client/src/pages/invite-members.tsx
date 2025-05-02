@@ -22,35 +22,43 @@ type InviteMembersData = z.infer<typeof inviteMembersSchema>;
 export default function InviteMembersPage() {
   const [_, setLocation] = useLocation();
   const { toast } = useToast();
-  
-  const { register, handleSubmit, formState: { errors } } = useForm<InviteMembersData>({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<InviteMembersData>({
     resolver: zodResolver(inviteMembersSchema),
     defaultValues: {
       invite1: "",
-      invite2: ""
-    }
+      invite2: "",
+    },
   });
-  
+
   const inviteMembersMutation = useMutation({
     mutationFn: async (data: InviteMembersData) => {
       // Get the organization ID - in a real app, would get the user's current org
       const orgId = 1;
-      
+
       // Send invites
       const invites = [];
-      
+
       if (data.invite1) {
         invites.push(
-          apiRequest("POST", `/api/organizations/${orgId}/invite`, { email: data.invite1 })
+          apiRequest("POST", `/api/organizations/${orgId}/invite`, {
+            email: data.invite1,
+          }),
         );
       }
-      
+
       if (data.invite2) {
         invites.push(
-          apiRequest("POST", `/api/organizations/${orgId}/invite`, { email: data.invite2 })
+          apiRequest("POST", `/api/organizations/${orgId}/invite`, {
+            email: data.invite2,
+          }),
         );
       }
-      
+
       await Promise.all(invites);
       return { success: true };
     },
@@ -65,11 +73,11 @@ export default function InviteMembersPage() {
       toast({
         title: "Failed to send invites",
         description: error.message || "Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
-  
+
   const onSubmit = (data: InviteMembersData) => {
     inviteMembersMutation.mutate(data);
   };
@@ -81,8 +89,10 @@ export default function InviteMembersPage() {
 
   return (
     <AuthLayout>
-      <h2 className="text-lg font-semibold text-center mb-4">Convide até 2 membros para sua organização</h2>
-      
+      <h2 className="text-lg font-semibold text-center mb-4">
+        Convide até 2 membros para sua organização
+      </h2>
+
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <Label htmlFor="invite1">Email</Label>
@@ -93,10 +103,12 @@ export default function InviteMembersPage() {
             className={errors.invite1 ? "border-red-500" : ""}
           />
           {errors.invite1 && (
-            <p className="text-red-500 text-sm mt-1">{errors.invite1.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.invite1.message}
+            </p>
           )}
         </div>
-        
+
         <div>
           <Label htmlFor="invite2">Email</Label>
           <Input
@@ -106,10 +118,12 @@ export default function InviteMembersPage() {
             className={errors.invite2 ? "border-red-500" : ""}
           />
           {errors.invite2 && (
-            <p className="text-red-500 text-sm mt-1">{errors.invite2.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.invite2.message}
+            </p>
           )}
         </div>
-        
+
         <div className="flex space-x-2">
           <Button
             type="submit"
@@ -118,7 +132,7 @@ export default function InviteMembersPage() {
           >
             {inviteMembersMutation.isPending ? "Enviando..." : "Continuar"}
           </Button>
-          
+
           <Button
             type="button"
             variant="outline"

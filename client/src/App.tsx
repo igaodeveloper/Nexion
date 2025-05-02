@@ -14,14 +14,14 @@ function App() {
 
   useEffect(() => {
     // Check if this is the first time the user is visiting the app
-    const hasSeenWelcome = localStorage.getItem('nexion_welcome_seen');
+    const hasSeenWelcome = localStorage.getItem("nexion_welcome_seen");
     if (!hasSeenWelcome) {
       setShowWelcomeScreen(true);
     }
   }, []);
 
   const handleWelcomeComplete = () => {
-    localStorage.setItem('nexion_welcome_seen', 'true');
+    localStorage.setItem("nexion_welcome_seen", "true");
     setShowWelcomeScreen(false);
     // Navigate to login page instead of directly to dashboard
     setLocation("/login");

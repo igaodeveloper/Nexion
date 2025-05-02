@@ -12,7 +12,9 @@ export async function login(data: LoginData): Promise<boolean> {
   }
 }
 
-export async function register(data: Omit<InsertUser, "confirmPassword"> & { confirmPassword: string }): Promise<boolean> {
+export async function register(
+  data: Omit<InsertUser, "confirmPassword"> & { confirmPassword: string },
+): Promise<boolean> {
   try {
     const { confirmPassword, ...userData } = data;
     await apiRequest("POST", "/api/auth/register", userData);
@@ -38,7 +40,7 @@ export async function checkAuth(): Promise<boolean> {
     const response = await fetch("/api/user", {
       credentials: "include",
     });
-    
+
     return response.ok;
   } catch (error) {
     return false;

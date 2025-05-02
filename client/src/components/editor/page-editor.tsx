@@ -1,23 +1,28 @@
-import React, { useState, useRef } from 'react';
-import { Block } from '@shared/schema';
-import BlockEditor from './block-editor';
-import { Button } from '@/components/ui/button';
-import { 
-  SmileIcon, ImageIcon, StarIcon, HeartIcon, 
-  RefreshCw, MoreHorizontal, Clock
-} from 'lucide-react';
+import React, { useState, useRef } from "react";
+import { Block } from "@shared/schema";
+import BlockEditor from "./block-editor";
+import { Button } from "@/components/ui/button";
+import {
+  SmileIcon,
+  ImageIcon,
+  StarIcon,
+  HeartIcon,
+  RefreshCw,
+  MoreHorizontal,
+  Clock,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { TimeMachine } from './time-machine';
-import { DocumentVersion } from '@shared/schema';
-import { ZenModeToggle } from '@/components/zen-mode-toggle';
-import { useZenMode } from '@/lib/zen-mode-provider';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { TimeMachine } from "./time-machine";
+import { DocumentVersion } from "@shared/schema";
+import { ZenModeToggle } from "@/components/zen-mode-toggle";
+import { useZenMode } from "@/lib/zen-mode-provider";
 
 export type Page = {
   id?: number;
@@ -40,18 +45,23 @@ interface PageEditorProps {
   readOnly?: boolean;
 }
 
-export function PageEditor({ page, onSave, isLoading = false, readOnly = false }: PageEditorProps) {
+export function PageEditor({
+  page,
+  onSave,
+  isLoading = false,
+  readOnly = false,
+}: PageEditorProps) {
   const [currentPage, setCurrentPage] = useState<Page>(page);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const { zenMode } = useZenMode();
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentPage(prev => ({ ...prev, title: e.target.value }));
+    setCurrentPage((prev) => ({ ...prev, title: e.target.value }));
   };
 
   const handleBlocksChange = (blocks: Block[]) => {
-    setCurrentPage(prev => ({ ...prev, blocks }));
+    setCurrentPage((prev) => ({ ...prev, blocks }));
   };
 
   const handleSave = () => {
@@ -62,45 +72,56 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
 
   const toggleStar = () => {
     if (readOnly) return;
-    setCurrentPage(prev => ({
+    setCurrentPage((prev) => ({
       ...prev,
-      isStarred: !prev.isStarred
+      isStarred: !prev.isStarred,
     }));
   };
 
   const toggleFavorite = () => {
     if (readOnly) return;
-    setCurrentPage(prev => ({
+    setCurrentPage((prev) => ({
       ...prev,
-      isFavorite: !prev.isFavorite
+      isFavorite: !prev.isFavorite,
     }));
   };
 
   const handleEmojiChange = (emoji: string) => {
-    setCurrentPage(prev => ({
+    setCurrentPage((prev) => ({
       ...prev,
-      emoji
+      emoji,
     }));
     setShowEmojiPicker(false);
   };
 
-  const sampleEmojis = ['📝', '✅', '📊', '🎯', '💡', '🚀', '🎨', '🔍', '📌', '📚'];
+  const sampleEmojis = [
+    "📝",
+    "✅",
+    "📊",
+    "🎯",
+    "💡",
+    "🚀",
+    "🎨",
+    "🔍",
+    "📌",
+    "📚",
+  ];
 
   const handleChangeCoverImage = (url: string) => {
-    setCurrentPage(prev => ({
+    setCurrentPage((prev) => ({
       ...prev,
-      coverImage: url
+      coverImage: url,
     }));
   };
 
   // Unsplash sample cover images
   const coverImageOptions = [
-    'https://images.unsplash.com/photo-1579546929518-9e396f3cc809',
-    'https://images.unsplash.com/photo-1589395937772-f67057e233b8',
-    'https://images.unsplash.com/photo-1584270413639-d5ee397272cd',
-    'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2',
-    'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d',
-    'https://images.unsplash.com/photo-1542831371-29b0f74f9713'
+    "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
+    "https://images.unsplash.com/photo-1589395937772-f67057e233b8",
+    "https://images.unsplash.com/photo-1584270413639-d5ee397272cd",
+    "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2",
+    "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d",
+    "https://images.unsplash.com/photo-1542831371-29b0f74f9713",
   ];
 
   const handleRestoreVersion = (version: DocumentVersion) => {
@@ -111,16 +132,18 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
       coverImage: version.coverImage,
       blocks: JSON.parse(version.blocks),
     };
-    
+
     setCurrentPage(restoredPage);
     onSave(restoredPage);
   };
 
   return (
-    <div className={cn(
-      "flex flex-col min-h-screen bg-background",
-      zenMode && "zen-fullscreen"
-    )}>
+    <div
+      className={cn(
+        "flex flex-col min-h-screen bg-background",
+        zenMode && "zen-fullscreen",
+      )}
+    >
       {/* Cover Image */}
       {currentPage.coverImage ? (
         <div className="relative h-48 md:h-64 w-full overflow-hidden">
@@ -138,14 +161,21 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                     Change Cover
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 grid grid-cols-2 gap-1 p-1">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 grid grid-cols-2 gap-1 p-1"
+                >
                   {coverImageOptions.map((url, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="relative h-16 cursor-pointer rounded-md overflow-hidden"
                       onClick={() => handleChangeCoverImage(url)}
                     >
-                      <img src={url} alt={`Cover option ${index}`} className="w-full h-full object-cover" />
+                      <img
+                        src={url}
+                        alt={`Cover option ${index}`}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   ))}
                   <DropdownMenuItem className="col-span-2 justify-center text-center">
@@ -156,28 +186,37 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
             </div>
           )}
         </div>
-      ) : !readOnly && (
-        <div className="flex justify-end p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <ImageIcon className="mr-2 h-4 w-4" />
-                Add Cover
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 grid grid-cols-2 gap-1 p-1">
-              {coverImageOptions.map((url, index) => (
-                <div 
-                  key={index} 
-                  className="relative h-16 cursor-pointer rounded-md overflow-hidden"
-                  onClick={() => handleChangeCoverImage(url)}
-                >
-                  <img src={url} alt={`Cover option ${index}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+      ) : (
+        !readOnly && (
+          <div className="flex justify-end p-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  Add Cover
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 grid grid-cols-2 gap-1 p-1"
+              >
+                {coverImageOptions.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative h-16 cursor-pointer rounded-md overflow-hidden"
+                    onClick={() => handleChangeCoverImage(url)}
+                  >
+                    <img
+                      src={url}
+                      alt={`Cover option ${index}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )
       )}
 
       <div className="flex flex-1 flex-col items-center mx-auto w-full max-w-4xl px-4">
@@ -190,27 +229,29 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 size="icon"
                 className={cn(
                   "text-3xl md:text-5xl h-10 w-10 md:h-12 md:w-12 rounded-lg",
-                  readOnly ? "cursor-default" : "cursor-pointer"
+                  readOnly ? "cursor-default" : "cursor-pointer",
                 )}
                 onClick={() => !readOnly && setShowEmojiPicker(true)}
                 disabled={readOnly}
               >
                 <span>{currentPage.emoji}</span>
               </Button>
-            ) : !readOnly && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-10 md:h-12 w-10 md:w-12 rounded-lg"
-                onClick={() => setShowEmojiPicker(true)}
-              >
-                <SmileIcon className="h-5 w-5 text-muted-foreground" />
-              </Button>
+            ) : (
+              !readOnly && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 md:h-12 w-10 md:w-12 rounded-lg"
+                  onClick={() => setShowEmojiPicker(true)}
+                >
+                  <SmileIcon className="h-5 w-5 text-muted-foreground" />
+                </Button>
+              )
             )}
 
             {showEmojiPicker && (
               <div className="absolute z-10 top-full left-0 mt-1 bg-popover border rounded-md shadow-md p-2 grid grid-cols-5 gap-1">
-                {sampleEmojis.map(emoji => (
+                {sampleEmojis.map((emoji) => (
                   <Button
                     key={emoji}
                     variant="ghost"
@@ -243,7 +284,9 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 size="sm"
                 className={cn(
                   "flex items-center space-x-1",
-                  currentPage.isStarred ? "text-yellow-500 hover:text-yellow-600" : ""
+                  currentPage.isStarred
+                    ? "text-yellow-500 hover:text-yellow-600"
+                    : "",
                 )}
                 onClick={toggleStar}
               >
@@ -251,14 +294,16 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 <span>{currentPage.isStarred ? "Destacado" : "Destacar"}</span>
               </Button>
             )}
-            
+
             {!readOnly && (
               <Button
                 variant="outline"
                 size="sm"
                 className={cn(
                   "flex items-center space-x-1",
-                  currentPage.isFavorite ? "text-red-500 hover:text-red-600" : ""
+                  currentPage.isFavorite
+                    ? "text-red-500 hover:text-red-600"
+                    : "",
                 )}
                 onClick={toggleFavorite}
               >
@@ -266,23 +311,25 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 <span>{currentPage.isFavorite ? "Favorito" : "Favoritar"}</span>
               </Button>
             )}
-            
+
             {/* Time Machine Button */}
             {currentPage.id && (
-              <TimeMachine 
-                documentId={currentPage.id} 
+              <TimeMachine
+                documentId={currentPage.id}
                 currentPage={currentPage}
                 onRestore={handleRestoreVersion}
               />
             )}
           </div>
         </div>
-        
+
         {/* Action Buttons */}
-        <div className={cn(
-          "flex items-center justify-between w-full mb-6",
-          zenMode && "zen-hidden"
-        )}>
+        <div
+          className={cn(
+            "flex items-center justify-between w-full mb-6",
+            zenMode && "zen-hidden",
+          )}
+        >
           <div className="flex items-center space-x-2">
             {!readOnly && (
               <Button
@@ -290,7 +337,9 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 size="sm"
                 className={cn(
                   "flex items-center space-x-1",
-                  currentPage.isStarred ? "text-yellow-500 hover:text-yellow-600" : ""
+                  currentPage.isStarred
+                    ? "text-yellow-500 hover:text-yellow-600"
+                    : "",
                 )}
                 onClick={toggleStar}
               >
@@ -298,14 +347,16 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 <span>{currentPage.isStarred ? "Destacado" : "Destacar"}</span>
               </Button>
             )}
-            
+
             {!readOnly && (
               <Button
                 variant="outline"
                 size="sm"
                 className={cn(
                   "flex items-center space-x-1",
-                  currentPage.isFavorite ? "text-red-500 hover:text-red-600" : ""
+                  currentPage.isFavorite
+                    ? "text-red-500 hover:text-red-600"
+                    : "",
                 )}
                 onClick={toggleFavorite}
               >
@@ -313,19 +364,19 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
                 <span>{currentPage.isFavorite ? "Favorito" : "Favoritar"}</span>
               </Button>
             )}
-            
+
             {/* Time Machine Button */}
             {currentPage.id && (
-              <TimeMachine 
-                documentId={currentPage.id} 
+              <TimeMachine
+                documentId={currentPage.id}
                 currentPage={currentPage}
                 onRestore={handleRestoreVersion}
               />
             )}
           </div>
-          
+
           {!readOnly && (
-            <Button 
+            <Button
               variant="default"
               disabled={isLoading}
               onClick={handleSave}
@@ -359,7 +410,7 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
 
         {/* Document Blocks */}
         <div className="w-full">
-          <BlockEditor 
+          <BlockEditor
             blocks={currentPage.blocks}
             onChange={handleBlocksChange}
             readOnly={readOnly}

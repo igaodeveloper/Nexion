@@ -1,9 +1,28 @@
 import { useState } from "react";
-import { Search, Plus, User, Mail, Phone, MoreHorizontal, Users, Briefcase, Filter, Download, ArrowUpDown } from "lucide-react";
+import {
+  Search,
+  Plus,
+  User,
+  Mail,
+  Phone,
+  MoreHorizontal,
+  Users,
+  Briefcase,
+  Filter,
+  Download,
+  ArrowUpDown,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -63,7 +82,7 @@ export default function TeamPage() {
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  
+
   // Mock data for team members
   const members: TeamMember[] = [
     {
@@ -77,7 +96,7 @@ export default function TeamPage() {
       phone: "+55 11 98765-4321",
       workload: 85,
       projects: ["Website Redesign", "Mobile App"],
-      joinedAt: new Date(2021, 5, 15)
+      joinedAt: new Date(2021, 5, 15),
     },
     {
       id: "2",
@@ -90,7 +109,7 @@ export default function TeamPage() {
       phone: "+55 11 91234-5678",
       workload: 70,
       projects: ["Dashboard", "Mobile App", "API Integration"],
-      joinedAt: new Date(2020, 3, 10)
+      joinedAt: new Date(2020, 3, 10),
     },
     {
       id: "3",
@@ -103,7 +122,7 @@ export default function TeamPage() {
       phone: "+55 21 98888-7777",
       workload: 90,
       projects: ["Website Redesign", "Marketing Campaign"],
-      joinedAt: new Date(2019, 8, 22)
+      joinedAt: new Date(2019, 8, 22),
     },
     {
       id: "4",
@@ -116,7 +135,7 @@ export default function TeamPage() {
       phone: "+55 11 97777-6666",
       workload: 65,
       projects: ["API Integration", "Database Migration"],
-      joinedAt: new Date(2022, 1, 5)
+      joinedAt: new Date(2022, 1, 5),
     },
     {
       id: "5",
@@ -129,7 +148,7 @@ export default function TeamPage() {
       phone: "+55 11 96666-5555",
       workload: 75,
       projects: ["Marketing Campaign", "Social Media Strategy"],
-      joinedAt: new Date(2021, 10, 18)
+      joinedAt: new Date(2021, 10, 18),
     },
     {
       id: "6",
@@ -142,7 +161,7 @@ export default function TeamPage() {
       phone: "+55 11 95555-4444",
       workload: 80,
       projects: ["Website Redesign", "Brand Refresh"],
-      joinedAt: new Date(2020, 7, 30)
+      joinedAt: new Date(2020, 7, 30),
     },
     {
       id: "7",
@@ -155,7 +174,7 @@ export default function TeamPage() {
       phone: "+55 21 94444-3333",
       workload: 60,
       projects: ["Blog Articles", "SEO Optimization"],
-      joinedAt: new Date(2022, 4, 12)
+      joinedAt: new Date(2022, 4, 12),
     },
     {
       id: "8",
@@ -168,34 +187,36 @@ export default function TeamPage() {
       phone: "+55 11 93333-2222",
       workload: 85,
       projects: ["CI/CD Pipeline", "Cloud Migration"],
-      joinedAt: new Date(2020, 9, 8)
-    }
+      joinedAt: new Date(2020, 9, 8),
+    },
   ];
-  
+
   // Filtering and sorting logic
   const filteredMembers = members
-    .filter(member => {
+    .filter((member) => {
       // Filter by search query
-      const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         member.role.toLowerCase().includes(searchQuery.toLowerCase());
-      
+      const matchesSearch =
+        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.role.toLowerCase().includes(searchQuery.toLowerCase());
+
       // Filter by tab
-      const matchesTab = 
-        currentTab === "all" || 
+      const matchesTab =
+        currentTab === "all" ||
         (currentTab === "active" && member.status === "active") ||
         (currentTab === "away" && member.status === "away") ||
         (currentTab === "offline" && member.status === "offline");
-      
+
       // Filter by department
-      const matchesDepartment = departmentFilter === "all" || member.department === departmentFilter;
-      
+      const matchesDepartment =
+        departmentFilter === "all" || member.department === departmentFilter;
+
       return matchesSearch && matchesTab && matchesDepartment;
     })
     .sort((a, b) => {
       // Handle sorting
       if (sortBy === "name") {
-        return sortDirection === "asc" 
+        return sortDirection === "asc"
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name);
       } else if (sortBy === "department") {
@@ -215,7 +236,7 @@ export default function TeamPage() {
       }
       return 0;
     });
-  
+
   const toggleSort = (column: string) => {
     if (sortBy === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -224,42 +245,48 @@ export default function TeamPage() {
       setSortDirection("asc");
     }
   };
-  
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-emerald-500";
-      case "offline": return "bg-slate-300";
-      case "away": return "bg-amber-400";
-      default: return "bg-slate-300";
+      case "active":
+        return "bg-emerald-500";
+      case "offline":
+        return "bg-slate-300";
+      case "away":
+        return "bg-amber-400";
+      default:
+        return "bg-slate-300";
     }
   };
-  
+
   const getWorkloadColor = (workload: number) => {
     if (workload >= 90) return "text-red-600";
     if (workload >= 70) return "text-amber-600";
     return "text-emerald-600";
   };
-  
+
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     }).format(date);
   };
-  
+
   const getDepartments = () => {
-    const departments = members.map(member => member.department);
+    const departments = members.map((member) => member.department);
     return Array.from(new Set(departments));
   };
-  
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-col space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Equipe</h1>
-            <p className="text-muted-foreground mt-1">Gerencie os membros da sua equipe e seus acessos.</p>
+            <p className="text-muted-foreground mt-1">
+              Gerencie os membros da sua equipe e seus acessos.
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm">
@@ -272,64 +299,89 @@ export default function TeamPage() {
             </Button>
           </div>
         </div>
-        
+
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar por nome, email ou cargo..." 
+            <Input
+              placeholder="Buscar por nome, email ou cargo..."
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
               <Filter className="h-4 w-4" />
               Filtros
             </Button>
-            
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+
+            <Select
+              value={departmentFilter}
+              onValueChange={setDepartmentFilter}
+            >
               <SelectTrigger className="w-[180px] h-9">
                 <SelectValue placeholder="Departamento" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos departamentos</SelectItem>
                 {getDepartments().map((dept, i) => (
-                  <SelectItem key={i} value={dept}>{dept}</SelectItem>
+                  <SelectItem key={i} value={dept}>
+                    {dept}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
-        
-        <Tabs defaultValue="all" className="w-full" value={currentTab} onValueChange={setCurrentTab}>
+
+        <Tabs
+          defaultValue="all"
+          className="w-full"
+          value={currentTab}
+          onValueChange={setCurrentTab}
+        >
           <TabsList className="mb-4">
             <TabsTrigger value="all" className="relative">
               Todos
-              <Badge variant="outline" className="ml-2 bg-primary/10">{members.length}</Badge>
+              <Badge variant="outline" className="ml-2 bg-primary/10">
+                {members.length}
+              </Badge>
             </TabsTrigger>
             <TabsTrigger value="active">
               Ativos
-              <Badge variant="outline" className="ml-2 bg-emerald-100 text-emerald-800">
-                {members.filter(m => m.status === "active").length}
+              <Badge
+                variant="outline"
+                className="ml-2 bg-emerald-100 text-emerald-800"
+              >
+                {members.filter((m) => m.status === "active").length}
               </Badge>
             </TabsTrigger>
             <TabsTrigger value="away">
               Ausentes
-              <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800">
-                {members.filter(m => m.status === "away").length}
+              <Badge
+                variant="outline"
+                className="ml-2 bg-amber-100 text-amber-800"
+              >
+                {members.filter((m) => m.status === "away").length}
               </Badge>
             </TabsTrigger>
             <TabsTrigger value="offline">
               Offline
-              <Badge variant="outline" className="ml-2 bg-slate-100 text-slate-800">
-                {members.filter(m => m.status === "offline").length}
+              <Badge
+                variant="outline"
+                className="ml-2 bg-slate-100 text-slate-800"
+              >
+                {members.filter((m) => m.status === "offline").length}
               </Badge>
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="all" className="mt-0">
             <Card>
               <CardContent className="p-0">
@@ -337,8 +389,8 @@ export default function TeamPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[300px]">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className="p-0 font-medium flex items-center gap-1 hover:bg-transparent"
                           onClick={() => toggleSort("name")}
                         >
@@ -347,8 +399,8 @@ export default function TeamPage() {
                         </Button>
                       </TableHead>
                       <TableHead>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className="p-0 font-medium flex items-center gap-1 hover:bg-transparent"
                           onClick={() => toggleSort("department")}
                         >
@@ -359,8 +411,8 @@ export default function TeamPage() {
                       <TableHead>Status</TableHead>
                       <TableHead>Projetos</TableHead>
                       <TableHead>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className="p-0 font-medium flex items-center gap-1 hover:bg-transparent"
                           onClick={() => toggleSort("workload")}
                         >
@@ -369,8 +421,8 @@ export default function TeamPage() {
                         </Button>
                       </TableHead>
                       <TableHead>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className="p-0 font-medium flex items-center gap-1 hover:bg-transparent"
                           onClick={() => toggleSort("joinedAt")}
                         >
@@ -391,19 +443,24 @@ export default function TeamPage() {
                                 <Avatar>
                                   <AvatarImage src={member.avatar} />
                                   <AvatarFallback className="bg-primary/10 text-primary">
-                                    {member.name.split(' ').map(n => n[0]).join('')}
+                                    {member.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span 
+                                <span
                                   className={cn(
                                     "absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background",
-                                    getStatusColor(member.status)
+                                    getStatusColor(member.status),
                                   )}
                                 />
                               </div>
                               <div>
                                 <div className="font-medium">{member.name}</div>
-                                <div className="text-sm text-muted-foreground">{member.email}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {member.email}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
@@ -412,39 +469,50 @@ export default function TeamPage() {
                               <Briefcase className="h-4 w-4 text-muted-foreground" />
                               <span>{member.department}</span>
                             </div>
-                            <div className="text-sm text-muted-foreground">{member.role}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {member.role}
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <Badge 
-                              variant="outline" 
+                            <Badge
+                              variant="outline"
                               className={cn(
                                 "flex items-center gap-1.5",
-                                member.status === "active" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" :
-                                member.status === "away" ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300" :
-                                "bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                                member.status === "active"
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                                  : member.status === "away"
+                                    ? "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                                    : "bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300",
                               )}
                             >
-                              <span className={cn(
-                                "h-2 w-2 rounded-full",
-                                getStatusColor(member.status)
-                              )} />
-                              {member.status === "active" ? "Ativo" : 
-                               member.status === "away" ? "Ausente" : "Offline"}
+                              <span
+                                className={cn(
+                                  "h-2 w-2 rounded-full",
+                                  getStatusColor(member.status),
+                                )}
+                              />
+                              {member.status === "active"
+                                ? "Ativo"
+                                : member.status === "away"
+                                  ? "Ausente"
+                                  : "Offline"}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             {member.projects && member.projects.length > 0 ? (
                               <div>
                                 <div className="flex -space-x-2">
-                                  {member.projects.slice(0, 3).map((project, i) => (
-                                    <div 
-                                      key={i} 
-                                      className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center border border-background text-[10px]"
-                                      title={project}
-                                    >
-                                      {project.charAt(0)}
-                                    </div>
-                                  ))}
+                                  {member.projects
+                                    .slice(0, 3)
+                                    .map((project, i) => (
+                                      <div
+                                        key={i}
+                                        className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center border border-background text-[10px]"
+                                        title={project}
+                                      >
+                                        {project.charAt(0)}
+                                      </div>
+                                    ))}
                                   {member.projects.length > 3 && (
                                     <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] border border-background">
                                       +{member.projects.length - 3}
@@ -456,12 +524,19 @@ export default function TeamPage() {
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-muted-foreground text-sm">Nenhum</span>
+                              <span className="text-muted-foreground text-sm">
+                                Nenhum
+                              </span>
                             )}
                           </TableCell>
                           <TableCell>
                             {member.workload !== undefined && (
-                              <div className={cn("font-medium", getWorkloadColor(member.workload))}>
+                              <div
+                                className={cn(
+                                  "font-medium",
+                                  getWorkloadColor(member.workload),
+                                )}
+                              >
                                 {member.workload}%
                               </div>
                             )}
@@ -504,12 +579,15 @@ export default function TeamPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center p-8 text-muted-foreground">
+                        <TableCell
+                          colSpan={7}
+                          className="text-center p-8 text-muted-foreground"
+                        >
                           <Users className="h-10 w-10 mx-auto mb-3 opacity-20" />
                           <p>Nenhum membro encontrado.</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="mt-4"
                             onClick={() => {
                               setSearchQuery("");
@@ -526,7 +604,7 @@ export default function TeamPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="active" className="mt-0">
             {/* Active members tab - same structure as "all" but filtered */}
             <Card>
@@ -543,14 +621,12 @@ export default function TeamPage() {
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {/* Content same as first tab */}
-                  </TableBody>
+                  <TableBody>{/* Content same as first tab */}</TableBody>
                 </Table>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="away" className="mt-0">
             {/* Away members tab - same structure */}
             <Card>
@@ -567,14 +643,12 @@ export default function TeamPage() {
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {/* Content same as first tab */}
-                  </TableBody>
+                  <TableBody>{/* Content same as first tab */}</TableBody>
                 </Table>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="offline" className="mt-0">
             {/* Offline members tab - same structure */}
             <Card>
@@ -591,26 +665,25 @@ export default function TeamPage() {
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
-                  <TableBody>
-                    {/* Content same as first tab */}
-                  </TableBody>
+                  <TableBody>{/* Content same as first tab */}</TableBody>
                 </Table>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
-      
+
       {/* Add Member Dialog */}
       <Dialog open={isAddingMember} onOpenChange={setIsAddingMember}>
         <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle>Adicionar novo membro</DialogTitle>
             <DialogDescription>
-              Adicione um novo membro à sua equipe. Eles receberão um convite por email.
+              Adicione um novo membro à sua equipe. Eles receberão um convite
+              por email.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
@@ -622,12 +695,12 @@ export default function TeamPage() {
                 <Input id="last-name" placeholder="Sobrenome" />
               </div>
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="email@exemplo.com" />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="role">Cargo</Label>
@@ -649,7 +722,7 @@ export default function TeamPage() {
                 </Select>
               </div>
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="access-level">Nível de acesso</Label>
               <Select defaultValue="member">
@@ -664,17 +737,22 @@ export default function TeamPage() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground mt-1">
-                Nível de acesso determina o que esse usuário pode ver e editar no sistema.
+                Nível de acesso determina o que esse usuário pode ver e editar
+                no sistema.
               </p>
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddingMember(false)}>Cancelar</Button>
-            <Button onClick={() => setIsAddingMember(false)}>Adicionar membro</Button>
+            <Button variant="outline" onClick={() => setIsAddingMember(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => setIsAddingMember(false)}>
+              Adicionar membro
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   );
-} 
+}

@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { Resource, ResourceFolder } from '@shared/schema';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
+import React, { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Resource, ResourceFolder } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -14,22 +14,22 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { 
-  FileIcon, 
-  FolderIcon, 
-  ImageIcon, 
-  FileTextIcon, 
-  FileAudioIcon, 
-  FileVideoIcon, 
-  LinkIcon, 
+} from "@/components/ui/dropdown-menu";
+import {
+  FileIcon,
+  FolderIcon,
+  ImageIcon,
+  FileTextIcon,
+  FileAudioIcon,
+  FileVideoIcon,
+  LinkIcon,
   MoreVertical,
   PlusIcon,
   UploadIcon,
@@ -37,154 +37,169 @@ import {
   Download,
   Edit,
   Trash,
-  ChevronRight
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  ChevronRight,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function ResourcesPage() {
   const { toast } = useToast();
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
-  const [uploadType, setUploadType] = useState<'file' | 'link'>('file');
-  const [uploadLink, setUploadLink] = useState('');
-  const [uploadLinkName, setUploadLinkName] = useState('');
+  const [newFolderName, setNewFolderName] = useState("");
+  const [uploadType, setUploadType] = useState<"file" | "link">("file");
+  const [uploadLink, setUploadLink] = useState("");
+  const [uploadLinkName, setUploadLinkName] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
 
   // Fetch resources and folders
-  const { data: resources, isLoading: resourcesLoading } = useQuery<Resource[]>({
-    queryKey: ['/api/resources', selectedFolder, searchQuery],
-  });
+  const { data: resources, isLoading: resourcesLoading } = useQuery<Resource[]>(
+    {
+      queryKey: ["/api/resources", selectedFolder, searchQuery],
+    },
+  );
 
-  const { data: folders, isLoading: foldersLoading } = useQuery<ResourceFolder[]>({
-    queryKey: ['/api/resource-folders'],
+  const { data: folders, isLoading: foldersLoading } = useQuery<
+    ResourceFolder[]
+  >({
+    queryKey: ["/api/resource-folders"],
   });
 
   // Create folder mutation
   const createFolderMutation = useMutation({
     mutationFn: async (name: string) => {
-      const response = await apiRequest('POST', '/api/resource-folders', {
+      const response = await apiRequest("POST", "/api/resource-folders", {
         name,
-        parentId: selectedFolder
+        parentId: selectedFolder,
       });
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/resource-folders'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resource-folders"] });
       setShowCreateFolderDialog(false);
-      setNewFolderName('');
+      setNewFolderName("");
       toast({
-        title: 'Pasta criada',
-        description: 'Pasta criada com sucesso!'
+        title: "Pasta criada",
+        description: "Pasta criada com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível criar a pasta.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Não foi possível criar a pasta.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Upload resource mutation
   const uploadResourceMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const response = await apiRequest('POST', '/api/resources/upload', formData, false);
+      const response = await apiRequest(
+        "POST",
+        "/api/resources/upload",
+        formData,
+        false,
+      );
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/resources'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resources"] });
       setShowUploadDialog(false);
-      setUploadLink('');
-      setUploadLinkName('');
+      setUploadLink("");
+      setUploadLinkName("");
       setSelectedFiles(null);
       toast({
-        title: 'Recurso adicionado',
-        description: 'Recurso adicionado com sucesso!'
+        title: "Recurso adicionado",
+        description: "Recurso adicionado com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível adicionar o recurso.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Não foi possível adicionar o recurso.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Add link mutation
   const addLinkMutation = useMutation({
     mutationFn: async (data: { name: string; url: string }) => {
-      const response = await apiRequest('POST', '/api/resources/link', {
+      const response = await apiRequest("POST", "/api/resources/link", {
         ...data,
-        folderId: selectedFolder
+        folderId: selectedFolder,
       });
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/resources'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resources"] });
       setShowUploadDialog(false);
-      setUploadLink('');
-      setUploadLinkName('');
+      setUploadLink("");
+      setUploadLinkName("");
       toast({
-        title: 'Link adicionado',
-        description: 'Link adicionado com sucesso!'
+        title: "Link adicionado",
+        description: "Link adicionado com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível adicionar o link.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Não foi possível adicionar o link.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Delete resource mutation
   const deleteResourceMutation = useMutation({
     mutationFn: async (resourceId: number) => {
-      const response = await apiRequest('DELETE', `/api/resources/${resourceId}`);
+      const response = await apiRequest(
+        "DELETE",
+        `/api/resources/${resourceId}`,
+      );
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/resources'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resources"] });
       toast({
-        title: 'Recurso excluído',
-        description: 'Recurso excluído com sucesso!'
+        title: "Recurso excluído",
+        description: "Recurso excluído com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível excluir o recurso.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Não foi possível excluir o recurso.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Delete folder mutation
   const deleteFolderMutation = useMutation({
     mutationFn: async (folderId: number) => {
-      const response = await apiRequest('DELETE', `/api/resource-folders/${folderId}`);
+      const response = await apiRequest(
+        "DELETE",
+        `/api/resource-folders/${folderId}`,
+      );
       return await response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/resource-folders'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resource-folders"] });
       toast({
-        title: 'Pasta excluída',
-        description: 'Pasta excluída com sucesso!'
+        title: "Pasta excluída",
+        description: "Pasta excluída com sucesso!",
       });
     },
     onError: () => {
       toast({
-        title: 'Erro',
-        description: 'Não foi possível excluir a pasta.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Não foi possível excluir a pasta.",
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleCreateFolder = () => {
@@ -194,17 +209,17 @@ export default function ResourcesPage() {
   };
 
   const handleUpload = () => {
-    if (uploadType === 'file' && selectedFiles && selectedFiles.length > 0) {
+    if (uploadType === "file" && selectedFiles && selectedFiles.length > 0) {
       const formData = new FormData();
-      formData.append('file', selectedFiles[0]);
+      formData.append("file", selectedFiles[0]);
       if (selectedFolder) {
-        formData.append('folderId', selectedFolder.toString());
+        formData.append("folderId", selectedFolder.toString());
       }
       uploadResourceMutation.mutate(formData);
-    } else if (uploadType === 'link' && uploadLink) {
+    } else if (uploadType === "link" && uploadLink) {
       addLinkMutation.mutate({
         name: uploadLinkName || uploadLink,
-        url: uploadLink
+        url: uploadLink,
       });
     }
   };
@@ -215,28 +230,32 @@ export default function ResourcesPage() {
   };
 
   const handleDeleteResource = (resourceId: number) => {
-    if (confirm('Tem certeza que deseja excluir este recurso?')) {
+    if (confirm("Tem certeza que deseja excluir este recurso?")) {
       deleteResourceMutation.mutate(resourceId);
     }
   };
 
   const handleDeleteFolder = (folderId: number) => {
-    if (confirm('Tem certeza que deseja excluir esta pasta e todo o seu conteúdo?')) {
+    if (
+      confirm(
+        "Tem certeza que deseja excluir esta pasta e todo o seu conteúdo?",
+      )
+    ) {
       deleteFolderMutation.mutate(folderId);
     }
   };
 
   const getResourceIcon = (resource: Resource) => {
     switch (resource.type) {
-      case 'image':
+      case "image":
         return <ImageIcon className="h-5 w-5 text-blue-500" />;
-      case 'pdf':
+      case "pdf":
         return <FileTextIcon className="h-5 w-5 text-red-500" />;
-      case 'audio':
+      case "audio":
         return <FileAudioIcon className="h-5 w-5 text-green-500" />;
-      case 'video':
+      case "video":
         return <FileVideoIcon className="h-5 w-5 text-purple-500" />;
-      case 'link':
+      case "link":
         return <LinkIcon className="h-5 w-5 text-yellow-500" />;
       default:
         return <FileIcon className="h-5 w-5 text-gray-500" />;
@@ -247,7 +266,11 @@ export default function ResourcesPage() {
     if (resource.thumbnailUrl) {
       return (
         <div className="h-40 w-full rounded-md overflow-hidden">
-          <img src={resource.thumbnailUrl} alt={resource.name} className="h-full w-full object-cover" />
+          <img
+            src={resource.thumbnailUrl}
+            alt={resource.name}
+            className="h-full w-full object-cover"
+          />
         </div>
       );
     }
@@ -256,19 +279,21 @@ export default function ResourcesPage() {
       <div className="h-40 w-full bg-muted rounded-md flex items-center justify-center">
         <div className="flex flex-col items-center">
           {getResourceIcon(resource)}
-          <span className="mt-2 text-xs text-muted-foreground">{resource.type}</span>
+          <span className="mt-2 text-xs text-muted-foreground">
+            {resource.type}
+          </span>
         </div>
       </div>
     );
   };
 
   const currentFolderPath = () => {
-    if (!selectedFolder) return 'Todos os recursos';
+    if (!selectedFolder) return "Todos os recursos";
 
-    if (!folders) return 'Carregando...';
+    if (!folders) return "Carregando...";
 
     const buildPath = (folderId: number, path: string[] = []): string[] => {
-      const folder = folders.find(f => f.id === folderId);
+      const folder = folders.find((f) => f.id === folderId);
       if (!folder) return path;
 
       path.unshift(folder.name);
@@ -279,12 +304,12 @@ export default function ResourcesPage() {
     };
 
     const path = buildPath(selectedFolder);
-    return path.join(' / ');
+    return path.join(" / ");
   };
 
   const filterFoldersByParentId = (parentId: number | null) => {
     if (!folders) return [];
-    return folders.filter(folder => folder.parentId === parentId);
+    return folders.filter((folder) => folder.parentId === parentId);
   };
 
   return (
@@ -294,7 +319,7 @@ export default function ResourcesPage() {
           <h1 className="text-2xl font-bold">Repositório de Recursos</h1>
           <p className="text-muted-foreground">{currentFolderPath()}</p>
         </div>
-        
+
         <div className="flex space-x-2">
           <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
             <DialogTrigger asChild>
@@ -307,13 +332,16 @@ export default function ResourcesPage() {
               <DialogHeader>
                 <DialogTitle>Adicionar Recurso</DialogTitle>
               </DialogHeader>
-              
-              <Tabs defaultValue="file" onValueChange={(v) => setUploadType(v as 'file' | 'link')}>
+
+              <Tabs
+                defaultValue="file"
+                onValueChange={(v) => setUploadType(v as "file" | "link")}
+              >
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="file">Arquivo</TabsTrigger>
                   <TabsTrigger value="link">Link</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="file" className="space-y-4 py-4">
                   <div className="flex flex-col gap-4">
                     <div className="border border-dashed border-border rounded-md p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors">
@@ -325,23 +353,31 @@ export default function ResourcesPage() {
                       />
                       <label htmlFor="file-upload" className="cursor-pointer">
                         <UploadIcon className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-                        <p className="mb-1">Arraste arquivos ou clique para fazer upload</p>
-                        <p className="text-sm text-muted-foreground">Suporta documentos, imagens, áudio e vídeo</p>
+                        <p className="mb-1">
+                          Arraste arquivos ou clique para fazer upload
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Suporta documentos, imagens, áudio e vídeo
+                        </p>
                       </label>
                     </div>
-                    
+
                     {selectedFiles && selectedFiles.length > 0 && (
                       <div className="bg-muted p-3 rounded-md">
-                        <p className="text-sm">Arquivo selecionado: {selectedFiles[0].name}</p>
+                        <p className="text-sm">
+                          Arquivo selecionado: {selectedFiles[0].name}
+                        </p>
                       </div>
                     )}
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="link" className="space-y-4 py-4">
                   <div className="flex flex-col gap-4">
                     <div>
-                      <label className="text-sm font-medium mb-1 block">Nome (opcional)</label>
+                      <label className="text-sm font-medium mb-1 block">
+                        Nome (opcional)
+                      </label>
                       <Input
                         placeholder="Nome para o link"
                         value={uploadLinkName}
@@ -349,7 +385,9 @@ export default function ResourcesPage() {
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-1 block">URL</label>
+                      <label className="text-sm font-medium mb-1 block">
+                        URL
+                      </label>
                       <Input
                         placeholder="https://"
                         value={uploadLink}
@@ -359,19 +397,23 @@ export default function ResourcesPage() {
                   </div>
                 </TabsContent>
               </Tabs>
-              
+
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUploadDialog(false)}
+                >
                   Cancelar
                 </Button>
-                <Button onClick={handleUpload}>
-                  Adicionar
-                </Button>
+                <Button onClick={handleUpload}>Adicionar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          
-          <Dialog open={showCreateFolderDialog} onOpenChange={setShowCreateFolderDialog}>
+
+          <Dialog
+            open={showCreateFolderDialog}
+            onOpenChange={setShowCreateFolderDialog}
+          >
             <DialogTrigger asChild>
               <Button variant="outline">
                 <FolderIcon className="h-4 w-4 mr-2" />
@@ -382,7 +424,7 @@ export default function ResourcesPage() {
               <DialogHeader>
                 <DialogTitle>Nova Pasta</DialogTitle>
               </DialogHeader>
-              
+
               <div className="py-4">
                 <Input
                   placeholder="Nome da pasta"
@@ -390,20 +432,21 @@ export default function ResourcesPage() {
                   onChange={(e) => setNewFolderName(e.target.value)}
                 />
               </div>
-              
+
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowCreateFolderDialog(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreateFolderDialog(false)}
+                >
                   Cancelar
                 </Button>
-                <Button onClick={handleCreateFolder}>
-                  Criar
-                </Button>
+                <Button onClick={handleCreateFolder}>Criar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </div>
-      
+
       <div className="mb-6">
         <form onSubmit={handleSearch} className="flex w-full max-w-lg">
           <div className="relative flex-1">
@@ -420,7 +463,7 @@ export default function ResourcesPage() {
           </Button>
         </form>
       </div>
-      
+
       <div className="flex gap-6">
         {/* Folders Sidebar */}
         <div className="w-64 shrink-0">
@@ -429,24 +472,26 @@ export default function ResourcesPage() {
             <div
               className={cn(
                 "flex items-center p-2 rounded-md cursor-pointer hover:bg-muted",
-                !selectedFolder && "bg-muted"
+                !selectedFolder && "bg-muted",
               )}
               onClick={() => setSelectedFolder(null)}
             >
               <FolderIcon className="h-4 w-4 mr-2" />
               <span>Todos os recursos</span>
             </div>
-            
+
             {foldersLoading ? (
-              <div className="text-center py-4 text-muted-foreground">Carregando...</div>
+              <div className="text-center py-4 text-muted-foreground">
+                Carregando...
+              </div>
             ) : (
               <div className="mt-2 space-y-1">
-                {filterFoldersByParentId(null).map(folder => (
-                  <div 
+                {filterFoldersByParentId(null).map((folder) => (
+                  <div
                     key={folder.id}
                     className={cn(
                       "flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-muted",
-                      selectedFolder === folder.id && "bg-muted"
+                      selectedFolder === folder.id && "bg-muted",
                     )}
                     onClick={() => setSelectedFolder(folder.id)}
                   >
@@ -454,15 +499,21 @@ export default function ResourcesPage() {
                       <FolderIcon className="h-4 w-4 mr-2" />
                       <span>{folder.name}</span>
                     </div>
-                    
+
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenuTrigger
+                        asChild
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteFolder(folder.id)}>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleDeleteFolder(folder.id)}
+                        >
                           <Trash className="h-4 w-4 mr-2" />
                           <span>Excluir</span>
                         </DropdownMenuItem>
@@ -474,29 +525,40 @@ export default function ResourcesPage() {
             )}
           </div>
         </div>
-        
+
         {/* Resources Grid */}
         <div className="flex-1">
           <h2 className="text-lg font-medium mb-2">Recursos</h2>
-          
+
           {resourcesLoading ? (
-            <div className="text-center py-20 text-muted-foreground">Carregando recursos...</div>
+            <div className="text-center py-20 text-muted-foreground">
+              Carregando recursos...
+            </div>
           ) : resources && resources.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {resources.map(resource => (
-                <div key={resource.id} className="bg-card border rounded-md overflow-hidden group">
+              {resources.map((resource) => (
+                <div
+                  key={resource.id}
+                  className="bg-card border rounded-md overflow-hidden group"
+                >
                   {getResourceThumbnail(resource)}
-                  
+
                   <div className="p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         {getResourceIcon(resource)}
-                        <h3 className="ml-2 font-medium truncate">{resource.name}</h3>
+                        <h3 className="ml-2 font-medium truncate">
+                          {resource.name}
+                        </h3>
                       </div>
-                      
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -510,16 +572,21 @@ export default function ResourcesPage() {
                             <span>Editar</span>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteResource(resource.id)}>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteResource(resource.id)}
+                          >
                             <Trash className="h-4 w-4 mr-2" />
                             <span>Excluir</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
-                    
+
                     {resource.description && (
-                      <p className="text-sm text-muted-foreground mt-1 truncate">{resource.description}</p>
+                      <p className="text-sm text-muted-foreground mt-1 truncate">
+                        {resource.description}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -529,11 +596,13 @@ export default function ResourcesPage() {
             <div className="text-center py-20 bg-muted/50 rounded-md">
               <FileIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h3 className="text-lg font-medium">Nenhum recurso encontrado</h3>
-              <p className="text-muted-foreground mt-1">Adicione recursos usando o botão acima</p>
+              <p className="text-muted-foreground mt-1">
+                Adicione recursos usando o botão acima
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-} 
+}

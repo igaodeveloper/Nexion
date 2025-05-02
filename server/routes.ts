@@ -1,14 +1,14 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { 
-  insertUserSchema, 
-  loginSchema, 
-  insertOrganizationSchema, 
+import {
+  insertUserSchema,
+  loginSchema,
+  insertOrganizationSchema,
   inviteMemberSchema,
   insertBoardSchema,
   insertTaskSchema,
-  Document
+  Document,
 } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
@@ -35,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       store: new MemoryStoreSession({
         checkPeriod: 86400000, // 24 hours
       }),
-    })
+    }),
   );
 
   // Authentication middleware
@@ -50,32 +50,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/register", async (req, res) => {
     try {
       const data = insertUserSchema.parse(req.body);
-      
+
       // Check if email already exists
       const existingEmail = await storage.getUserByEmail(data.email);
       if (existingEmail) {
         return res.status(400).json({ message: "Email already in use" });
       }
-      
+
       // Check if username already exists
       const existingUsername = await storage.getUserByUsername(data.username);
       if (existingUsername) {
         return res.status(400).json({ message: "Username already in use" });
       }
-      
+
       // Hash password
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      
+
       // Create user
       const user = await storage.createUser({
         ...data,
-        password: hashedPassword
+        password: hashedPassword,
       });
-      
+
       // Set session
       req.session.userId = user.id;
       req.session.email = user.email;
-      
+
       // Return user without password
       const { password, ...userWithoutPassword } = user;
       res.status(201).json(userWithoutPassword);
@@ -90,32 +90,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req, res) => {
     try {
       const data = loginSchema.parse(req.body);
-      
+
       // Get user by email
       const user = await storage.getUserByEmail(data.email);
       if (!user) {
         return res.status(400).json({ message: "Invalid email or password" });
       }
-      
+
       // Check password
       const passwordMatch = await bcrypt.compare(data.password, user.password);
       if (!passwordMatch) {
         return res.status(400).json({ message: "Invalid email or password" });
       }
-      
+
       // Record session
       await storage.createSession({
         userId: user.id,
         device: req.headers["user-agent"] || "Unknown",
         location: "Unknown", // Would use geolocation in a real app
         ipAddress: req.ip || "Unknown",
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-      
+
       // Set session
       req.session.userId = user.id;
       req.session.email = user.email;
-      
+
       // Return user without password
       const { password, ...userWithoutPassword } = user;
       res.status(200).json(userWithoutPassword);
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       // Return user without password
       const { password, ...userWithoutPassword } = user;
       res.status(200).json(userWithoutPassword);
@@ -158,13 +158,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       // Update user
       const updatedUser = await storage.updateUser(userId, req.body);
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
-      
+
       // Return user without password
       const { password, ...userWithoutPassword } = updatedUser;
       res.status(200).json(userWithoutPassword);
@@ -176,20 +176,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/organizations", requireAuth, async (req, res) => {
     try {
       const data = insertOrganizationSchema.parse(req.body);
-      
+
       // Create organization
       const organization = await storage.createOrganization({
         ...data,
-        createdBy: req.session.userId!
+        createdBy: req.session.userId!,
       });
-      
+
       // Add creator as member
       await storage.addOrganizationMember({
         organizationId: organization.id,
         userId: req.session.userId!,
-        role: "admin"
+        role: "admin",
       });
-      
+
       res.status(201).json(organization);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -203,15 +203,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const data = inviteMemberSchema.parse(req.body);
-      
+
       // Check if organization exists
       const organization = await storage.getOrganization(parseInt(id));
       if (!organization) {
         return res.status(404).json({ message: "Organization not found" });
       }
-      
+
       // In a real app, we would send an email invitation here
-      
+
       // For now, just return success
       res.status(200).json({ message: "Invitation sent" });
     } catch (error) {
@@ -224,7 +224,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/organizations", requireAuth, async (req, res) => {
     try {
-      const organizations = await storage.getOrganizationsByUser(req.session.userId!);
+      const organizations = await storage.getOrganizationsByUser(
+        req.session.userId!,
+      );
       res.status(200).json(organizations);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
@@ -252,13 +254,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/boards", requireAuth, async (req, res) => {
     try {
       const data = insertBoardSchema.parse(req.body);
-      
+
       // Create board
       const board = await storage.createBoard({
         ...data,
-        createdBy: req.session.userId!
+        createdBy: req.session.userId!,
       });
-      
+
       res.status(201).json(board);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -271,13 +273,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/boards/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Update board
       const board = await storage.updateBoard(parseInt(id), req.body);
       if (!board) {
         return res.status(404).json({ message: "Board not found" });
       }
-      
+
       res.status(200).json(board);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
@@ -306,10 +308,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/tasks", requireAuth, async (req, res) => {
     try {
       const data = insertTaskSchema.parse(req.body);
-      
+
       // Create task
       const task = await storage.createTask(data);
-      
+
       res.status(201).json(task);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -322,13 +324,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/tasks/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Update task
       const task = await storage.updateTask(parseInt(id), req.body);
       if (!task) {
         return res.status(404).json({ message: "Task not found" });
       }
-      
+
       res.status(200).json(task);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
@@ -338,15 +340,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/projects", requireAuth, async (req, res) => {
     try {
       // Get user's organizations
-      const organizations = await storage.getOrganizationsByUser(req.session.userId!);
-      
+      const organizations = await storage.getOrganizationsByUser(
+        req.session.userId!,
+      );
+
       // Get projects for each organization
       let projects = [];
       for (const org of organizations) {
         const orgProjects = await storage.getProjectsByOrganization(org.id);
         projects = [...projects, ...orgProjects];
       }
-      
+
       res.status(200).json(projects);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
@@ -382,7 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
-  
+
   app.get("/api/documents/favorites", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
@@ -392,7 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
-  
+
   app.get("/api/documents/starred", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
@@ -402,76 +406,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Server error" });
     }
   });
-  
+
   app.get("/api/documents/:id", requireAuth, async (req, res) => {
     try {
       const id = Number(req.params.id);
       const document = await storage.getDocument(id);
-      
+
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       // Parse the blocks from JSON string to object
       const documentWithParsedBlocks = {
         ...document,
-        blocks: JSON.parse(document.blocks as unknown as string)
+        blocks: JSON.parse(document.blocks as unknown as string),
       };
-      
+
       res.status(200).json(documentWithParsedBlocks);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
   });
-  
+
   app.post("/api/documents", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      
+
       // Convert blocks object to JSON string for storage
       const document = {
         ...req.body,
         createdBy: userId,
-        blocks: JSON.stringify(req.body.blocks)
+        blocks: JSON.stringify(req.body.blocks),
       };
-      
+
       const newDocument = await storage.createDocument(document);
-      
+
       // Return with parsed blocks
       const responseDocument = {
         ...newDocument,
-        blocks: JSON.parse(newDocument.blocks as unknown as string)
+        blocks: JSON.parse(newDocument.blocks as unknown as string),
       };
-      
+
       res.status(201).json(responseDocument);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
   });
-  
+
   app.patch("/api/documents/:id", requireAuth, async (req, res) => {
     try {
       const id = Number(req.params.id);
       const document = await storage.getDocument(id);
-      
+
       if (!document) {
         return res.status(404).json({ message: "Document not found" });
       }
-      
+
       // If blocks are being updated, convert to JSON string
       const updates: Partial<Document> = { ...req.body };
       if (updates.blocks) {
         updates.blocks = JSON.stringify(updates.blocks);
       }
-      
+
       const updatedDocument = await storage.updateDocument(id, updates);
-      
+
       // Return with parsed blocks
       const responseDocument = {
         ...updatedDocument,
-        blocks: JSON.parse(updatedDocument!.blocks as unknown as string)
+        blocks: JSON.parse(updatedDocument!.blocks as unknown as string),
       };
-      
+
       res.status(200).json(responseDocument);
     } catch (error) {
       res.status(500).json({ message: "Server error" });

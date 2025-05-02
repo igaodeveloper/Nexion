@@ -8,8 +8,18 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CalendarIcon, AlertCircle, CheckCircle2, Activity } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  CalendarIcon,
+  AlertCircle,
+  CheckCircle2,
+  Activity,
+} from "lucide-react";
 import { CheckedState } from "@radix-ui/react-checkbox";
 
 interface TaskRowProps {
@@ -43,13 +53,15 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
     const newStatus = task.completed ? "pending" : "complete";
     await apiRequest("PATCH", `/api/tasks/${task.id}`, {
       completed: !task.completed,
-      status: newStatus
+      status: newStatus,
     });
-    
+
     queryClient.invalidateQueries({ queryKey: [`/api/tasks/${task.id}`] });
     queryClient.invalidateQueries({ queryKey: ["/api/tasks/assigned"] });
-    queryClient.invalidateQueries({ queryKey: [`/api/boards/${task.boardId}/tasks`] });
-    
+    queryClient.invalidateQueries({
+      queryKey: [`/api/boards/${task.boardId}/tasks`],
+    });
+
     if (onStatusChange) {
       onStatusChange(task.id, newStatus);
     }
@@ -58,29 +70,29 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
   // Generate priority info
   const getPriorityInfo = (): PriorityInfo => {
     const map: Record<string, PriorityInfo> = {
-      "alta": {
+      alta: {
         bgColor: "bg-red-50",
         textColor: "text-red-700",
         borderColor: "border-red-200",
         icon: <AlertCircle className="h-3.5 w-3.5 mr-1.5" />,
-        label: "Alta"
+        label: "Alta",
       },
-      "media": {
+      media: {
         bgColor: "bg-yellow-50",
         textColor: "text-yellow-700",
         borderColor: "border-yellow-200",
         icon: <Activity className="h-3.5 w-3.5 mr-1.5" />,
-        label: "Média"
+        label: "Média",
       },
-      "baixa": {
+      baixa: {
         bgColor: "bg-green-50",
         textColor: "text-green-700",
         borderColor: "border-green-200",
         icon: <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />,
-        label: "Baixa"
-      }
+        label: "Baixa",
+      },
     };
-    
+
     const priority = (task.priority || "media").toLowerCase();
     return map[priority as keyof typeof map] || map["media"];
   };
@@ -88,34 +100,34 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
   // Generate status info
   const getStatusInfo = (): StatusInfo => {
     const map: Record<string, StatusInfo> = {
-      "pending": {
+      pending: {
         bgColor: "bg-yellow-50",
         textColor: "text-yellow-700",
         borderColor: "border-yellow-200",
-        label: "Pendente"
+        label: "Pendente",
       },
-      "in_progress": {
+      in_progress: {
         bgColor: "bg-blue-50",
         textColor: "text-blue-700",
         borderColor: "border-blue-200",
-        label: "Em Progresso"
+        label: "Em Progresso",
       },
-      "complete": {
+      complete: {
         bgColor: "bg-green-50",
         textColor: "text-green-700",
         borderColor: "border-green-200",
-        label: "Concluído"
-      }
+        label: "Concluído",
+      },
     };
-    
-    const status = (task.status || "pending").toLowerCase().replace('-', '_');
+
+    const status = (task.status || "pending").toLowerCase().replace("-", "_");
     return map[status as keyof typeof map] || map["pending"];
   };
 
   // Format date
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return "Sem data";
-    
+
     try {
       const date = new Date(dateString);
       return format(date, "dd 'de' MMM", { locale: ptBR });
@@ -127,7 +139,7 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
   // Check if date is close or overdue
   const isDateCritical = (): boolean => {
     if (!task.dueDate) return false;
-    
+
     try {
       const dueDate = new Date(task.dueDate);
       const today = new Date();
@@ -141,58 +153,65 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
 
   const priorityInfo = getPriorityInfo();
   const statusInfo = getStatusInfo();
-  
+
   // Corrigindo para usar apenas os tipos válidos para CheckedState: boolean | 'indeterminate'
-  const isTaskCompleted: CheckedState = task.completed === true ? true : 
-                                       task.completed === false ? false : 
-                                       'indeterminate';
+  const isTaskCompleted: CheckedState =
+    task.completed === true
+      ? true
+      : task.completed === false
+        ? false
+        : "indeterminate";
 
   return (
     <tr className="transition-colors hover:bg-accent/10 border-b border-border/50">
       <td className="px-5 py-4 whitespace-nowrap">
         <div className="flex items-center">
-          <Checkbox 
+          <Checkbox
             checked={isTaskCompleted}
             onCheckedChange={handleToggleCompletion}
-            className="mr-3 data-[state=checked]:bg-primary data-[state=checked]:border-primary" 
+            className="mr-3 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
           />
-          <span className={cn(
-            "font-medium text-foreground transition-all", 
-            task.completed && "line-through text-muted-foreground"
-          )}>
+          <span
+            className={cn(
+              "font-medium text-foreground transition-all",
+              task.completed && "line-through text-muted-foreground",
+            )}
+          >
             {task.title}
           </span>
         </div>
       </td>
       <td className="px-5 py-4">
-        <div className={cn(
-          "text-sm text-muted-foreground max-w-xs truncate transition-all", 
-          task.completed && "line-through opacity-70"
-        )}>
+        <div
+          className={cn(
+            "text-sm text-muted-foreground max-w-xs truncate transition-all",
+            task.completed && "line-through opacity-70",
+          )}
+        >
           {task.description}
         </div>
       </td>
       <td className="px-5 py-4 whitespace-nowrap">
-        <Badge 
-          variant="outline" 
+        <Badge
+          variant="outline"
           className={cn(
-            "font-normal border", 
-            statusInfo.bgColor, 
+            "font-normal border",
+            statusInfo.bgColor,
             statusInfo.textColor,
-            statusInfo.borderColor
+            statusInfo.borderColor,
           )}
         >
           {statusInfo.label}
         </Badge>
       </td>
       <td className="px-5 py-4 whitespace-nowrap">
-        <Badge 
-          variant="outline" 
+        <Badge
+          variant="outline"
           className={cn(
-            "font-normal border flex items-center", 
-            priorityInfo.bgColor, 
+            "font-normal border flex items-center",
+            priorityInfo.bgColor,
             priorityInfo.textColor,
-            priorityInfo.borderColor
+            priorityInfo.borderColor,
           )}
         >
           {priorityInfo.icon}
@@ -205,7 +224,9 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Avatar className="h-7 w-7 ring-1 ring-background">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs">JD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                    JD
+                  </AvatarFallback>
                 </Avatar>
               </TooltipTrigger>
               <TooltipContent>João Dias</TooltipContent>
@@ -222,10 +243,12 @@ export function TaskRow({ task, onStatusChange }: TaskRowProps) {
         </div>
       </td>
       <td className="px-5 py-4 whitespace-nowrap text-sm">
-        <div className={cn(
-          "flex items-center", 
-          isDateCritical() ? "text-red-600" : "text-muted-foreground"
-        )}>
+        <div
+          className={cn(
+            "flex items-center",
+            isDateCritical() ? "text-red-600" : "text-muted-foreground",
+          )}
+        >
           <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
           {formatDate(task.dueDate)}
         </div>

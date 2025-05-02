@@ -1,4 +1,12 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  jsonb,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -25,7 +33,9 @@ export const organizations = pgTable("organizations", {
   createdBy: integer("created_by").notNull(),
 });
 
-export const insertOrganizationSchema = createInsertSchema(organizations).omit({ id: true });
+export const insertOrganizationSchema = createInsertSchema(organizations).omit({
+  id: true,
+});
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
 export type Organization = typeof organizations.$inferSelect;
 
@@ -37,8 +47,12 @@ export const organizationMembers = pgTable("organization_members", {
   role: text("role").notNull().default("member"),
 });
 
-export const insertOrganizationMemberSchema = createInsertSchema(organizationMembers).omit({ id: true });
-export type InsertOrganizationMember = z.infer<typeof insertOrganizationMemberSchema>;
+export const insertOrganizationMemberSchema = createInsertSchema(
+  organizationMembers,
+).omit({ id: true });
+export type InsertOrganizationMember = z.infer<
+  typeof insertOrganizationMemberSchema
+>;
 export type OrganizationMember = typeof organizationMembers.$inferSelect;
 
 // Board model
@@ -79,7 +93,9 @@ export const projects = pgTable("projects", {
   organizationId: integer("organization_id").notNull(),
 });
 
-export const insertProjectSchema = createInsertSchema(projects).omit({ id: true });
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+});
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 
@@ -93,7 +109,9 @@ export const sessions = pgTable("sessions", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
-export const insertSessionSchema = createInsertSchema(sessions).omit({ id: true });
+export const insertSessionSchema = createInsertSchema(sessions).omit({
+  id: true,
+});
 export type InsertSession = z.infer<typeof insertSessionSchema>;
 export type Session = typeof sessions.$inferSelect;
 
@@ -107,7 +125,9 @@ export const taskUpdates = pgTable("task_updates", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
-export const insertTaskUpdateSchema = createInsertSchema(taskUpdates).omit({ id: true });
+export const insertTaskUpdateSchema = createInsertSchema(taskUpdates).omit({
+  id: true,
+});
 export type InsertTaskUpdate = z.infer<typeof insertTaskUpdateSchema>;
 export type TaskUpdate = typeof taskUpdates.$inferSelect;
 
@@ -128,25 +148,27 @@ export const inviteMemberSchema = z.object({
 export type InviteMemberData = z.infer<typeof inviteMemberSchema>;
 
 // Block schema (for documents)
-export const blockSchema: z.ZodType<any> = z.lazy(() => z.object({
-  id: z.string(),
-  type: z.enum([
-    'paragraph', 
-    'heading-1', 
-    'heading-2', 
-    'heading-3', 
-    'bullet-list', 
-    'numbered-list',
-    'to-do',
-    'table',
-    'image',
-    'calendar',
-    'file'
-  ]),
-  content: z.string(),
-  completed: z.boolean().optional(),
-  children: z.array(blockSchema).optional(),
-}));
+export const blockSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    type: z.enum([
+      "paragraph",
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "bullet-list",
+      "numbered-list",
+      "to-do",
+      "table",
+      "image",
+      "calendar",
+      "file",
+    ]),
+    content: z.string(),
+    completed: z.boolean().optional(),
+    children: z.array(blockSchema).optional(),
+  }),
+);
 
 export type Block = z.infer<typeof blockSchema>;
 
@@ -167,7 +189,9 @@ export const documents = pgTable("documents", {
   isFavorite: boolean("is_favorite").default(false),
 });
 
-export const insertDocumentSchema = createInsertSchema(documents).omit({ id: true });
+export const insertDocumentSchema = createInsertSchema(documents).omit({
+  id: true,
+});
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documents.$inferSelect;
 
@@ -221,7 +245,7 @@ export interface Resource {
   organizationId: number;
   createdBy: number;
   name: string;
-  type: 'image' | 'pdf' | 'audio' | 'video' | 'link' | 'other';
+  type: "image" | "pdf" | "audio" | "video" | "link" | "other";
   url: string;
   fileSize?: number;
   folderId?: number | null;

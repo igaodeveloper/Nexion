@@ -17,16 +17,20 @@ import { Logo } from "@/components/logo";
 export default function LoginPage() {
   const [_, setLocation] = useLocation();
   const { toast } = useToast();
-  
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false
-    }
+      rememberMe: false,
+    },
   });
-  
+
   const loginMutation = useMutation({
     mutationFn: async (data: LoginData) => {
       const response = await apiRequest("POST", "/api/auth/login", data);
@@ -38,23 +42,24 @@ export default function LoginPage() {
     onError: (error) => {
       toast({
         title: "Login failed",
-        description: error.message || "Please check your credentials and try again.",
-        variant: "destructive"
+        description:
+          error.message || "Please check your credentials and try again.",
+        variant: "destructive",
       });
-    }
+    },
   });
-  
+
   const onSubmit = (data: LoginData) => {
     loginMutation.mutate(data);
   };
 
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.6 }
-    }
+      transition: { duration: 0.6 },
+    },
   };
 
   const staggerChildren = {
@@ -62,51 +67,48 @@ export default function LoginPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500/10 via-indigo-400/5 to-primary/10 flex flex-col items-center justify-center">
-      <motion.div 
+      <motion.div
         initial="hidden"
         animate="visible"
         variants={fadeIn}
         className="w-full max-w-[420px] p-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-xl shadow-xl"
       >
-        <motion.div 
+        <motion.div
           className="flex justify-center mb-8"
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
           <Logo size="lg" variant="full" />
         </motion.div>
-        
-        <motion.h2 
+
+        <motion.h2
           variants={fadeIn}
           className="text-3xl font-semibold text-center mb-2"
         >
           Log in
         </motion.h2>
-        
-        <motion.p 
+
+        <motion.p
           variants={fadeIn}
           className="text-center text-muted-foreground mb-8"
         >
           Entre para acessar seu workspace
         </motion.p>
-        
-        <motion.form 
-          className="space-y-5" 
+
+        <motion.form
+          className="space-y-5"
           onSubmit={handleSubmit(onSubmit)}
           variants={staggerChildren}
         >
-          <motion.div 
-            className="space-y-4"
-            variants={staggerChildren}
-          >
-            <motion.div 
+          <motion.div className="space-y-4" variants={staggerChildren}>
+            <motion.div
               className="relative"
               variants={fadeIn}
               whileHover={{ scale: 1.02 }}
@@ -122,11 +124,13 @@ export default function LoginPage() {
                 className={`pl-10 h-12 text-base transition-all duration-300 ${errors.email ? "border-red-500" : ""}`}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
               )}
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="relative"
               variants={fadeIn}
               whileHover={{ scale: 1.02 }}
@@ -142,25 +146,32 @@ export default function LoginPage() {
                 className={`pl-10 h-12 text-base transition-all duration-300 ${errors.password ? "border-red-500" : ""}`}
               />
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
               )}
             </motion.div>
           </motion.div>
-          
-          <motion.div 
+
+          <motion.div
             className="flex items-center justify-between"
             variants={fadeIn}
           >
             <div className="flex items-center space-x-2">
               <Checkbox id="remember-me" {...register("rememberMe")} />
-              <Label htmlFor="remember-me" className="text-sm font-normal">Lembrar-me</Label>
+              <Label htmlFor="remember-me" className="text-sm font-normal">
+                Lembrar-me
+              </Label>
             </div>
-            
-            <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+
+            <Link
+              href="/forgot-password"
+              className="text-sm text-primary hover:underline"
+            >
               Esqueceu a senha?
             </Link>
           </motion.div>
-          
+
           <motion.div
             variants={fadeIn}
             whileHover={{ scale: 1.03 }}
@@ -176,27 +187,29 @@ export default function LoginPage() {
           </motion.div>
         </motion.form>
 
-        <motion.div 
-          className="flex items-center my-8"
-          variants={fadeIn}
-        >
+        <motion.div className="flex items-center my-8" variants={fadeIn}>
           <div className="flex-1 border-t border-border"></div>
           <span className="px-4 text-sm text-muted-foreground">Ou</span>
           <div className="flex-1 border-t border-border"></div>
         </motion.div>
-        
-        <motion.div 
-          className="space-y-4"
-          variants={staggerChildren}
-        >
+
+        <motion.div className="space-y-4" variants={staggerChildren}>
           <div className="grid grid-cols-2 gap-4">
             <motion.div
               variants={fadeIn}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Button variant="outline" className="h-12 text-base font-normal rounded-full flex items-center justify-center w-full backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/10">
-                <svg viewBox="0 0 24 24" width="24" height="24" className="mr-2">
+              <Button
+                variant="outline"
+                className="h-12 text-base font-normal rounded-full flex items-center justify-center w-full backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/10"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  className="mr-2"
+                >
                   <path
                     fill="#4285F4"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -217,14 +230,22 @@ export default function LoginPage() {
                 Google
               </Button>
             </motion.div>
-            
+
             <motion.div
               variants={fadeIn}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Button variant="outline" className="h-12 text-base font-normal rounded-full flex items-center justify-center w-full backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/10">
-                <svg viewBox="0 0 24 24" width="24" height="24" className="mr-2">
+              <Button
+                variant="outline"
+                className="h-12 text-base font-normal rounded-full flex items-center justify-center w-full backdrop-blur-sm hover:bg-white/50 dark:hover:bg-white/10"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  className="mr-2"
+                >
                   <rect width="24" height="24" fill="#0A66C2" rx="2" />
                   <path
                     fill="#FFFFFF"
@@ -235,13 +256,14 @@ export default function LoginPage() {
               </Button>
             </motion.div>
           </div>
-          
-          <motion.div 
-            className="text-center"
-            variants={fadeIn}
-          >
-            <p className="text-sm text-muted-foreground">Não tem uma conta?{" "}
-              <Link href="/register" className="text-primary hover:underline font-medium">
+
+          <motion.div className="text-center" variants={fadeIn}>
+            <p className="text-sm text-muted-foreground">
+              Não tem uma conta?{" "}
+              <Link
+                href="/register"
+                className="text-primary hover:underline font-medium"
+              >
                 Criar conta
               </Link>
             </p>
@@ -249,7 +271,7 @@ export default function LoginPage() {
         </motion.div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         variants={fadeIn}
         initial="hidden"
         animate="visible"

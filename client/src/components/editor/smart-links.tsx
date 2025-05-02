@@ -1,28 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Document } from '@shared/schema';
+import React, { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Document } from "@shared/schema";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Link, FileText, ExternalLink } from 'lucide-react';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { Link, FileText, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SmartLinksProps {
   text: string;
-  onCreateLink: (documentId: number, documentTitle: string, anchorText: string) => void;
+  onCreateLink: (
+    documentId: number,
+    documentTitle: string,
+    anchorText: string,
+  ) => void;
   onClose: () => void;
 }
 
 export function SmartLinks({ text, onCreateLink, onClose }: SmartLinksProps) {
   const [open, setOpen] = useState(true);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: documents, isLoading } = useQuery<Document[]>({
-    queryKey: ['/api/documents/search', text],
+    queryKey: ["/api/documents/search", text],
     enabled: open,
   });
 
@@ -43,14 +53,14 @@ export function SmartLinks({ text, onCreateLink, onClose }: SmartLinksProps) {
   // Close the popover when ESC is pressed
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setOpen(false);
         onClose();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
   // Close the popover when clicking outside
@@ -79,21 +89,25 @@ export function SmartLinks({ text, onCreateLink, onClose }: SmartLinksProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0" align="start">
         <Command>
-          <CommandInput 
-            placeholder="Pesquisar documentos..." 
+          <CommandInput
+            placeholder="Pesquisar documentos..."
             value={inputValue}
             onValueChange={setInputValue}
             ref={inputRef}
           />
           {isLoading ? (
             <div className="py-6 text-center">
-              <p className="text-sm text-muted-foreground">Buscando documentos...</p>
+              <p className="text-sm text-muted-foreground">
+                Buscando documentos...
+              </p>
             </div>
           ) : (
             <>
               <CommandEmpty>
                 <div className="py-3 px-2">
-                  <p className="text-sm text-muted-foreground mb-2">Nenhum documento encontrado com esse texto.</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Nenhum documento encontrado com esse texto.
+                  </p>
                   <button
                     className="flex items-center gap-2 p-2 rounded-md text-sm w-full hover:bg-primary/10 transition-colors"
                     onClick={handleCreateNewDocument}
@@ -103,7 +117,7 @@ export function SmartLinks({ text, onCreateLink, onClose }: SmartLinksProps) {
                   </button>
                 </div>
               </CommandEmpty>
-              
+
               <CommandGroup heading="Documentos Sugeridos">
                 {documents?.map((doc) => (
                   <CommandItem
@@ -112,7 +126,7 @@ export function SmartLinks({ text, onCreateLink, onClose }: SmartLinksProps) {
                     className="flex items-center gap-2 py-2"
                   >
                     <div className="flex items-center gap-2 flex-1">
-                      <div className="text-lg mr-1">{doc.emoji || '📄'}</div>
+                      <div className="text-lg mr-1">{doc.emoji || "📄"}</div>
                       <span className="flex-1 truncate">{doc.title}</span>
                     </div>
                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
@@ -130,35 +144,35 @@ export function SmartLinks({ text, onCreateLink, onClose }: SmartLinksProps) {
 // This component is used to detect potential links in text and suggest linking to existing documents
 export function useLinkDetection(text: string, enabled = true) {
   const [potentialLinks, setPotentialLinks] = useState<string[]>([]);
-  
+
   // Fetch all document titles
   const { data: allDocuments } = useQuery<Document[]>({
-    queryKey: ['/api/documents'],
+    queryKey: ["/api/documents"],
     enabled,
   });
-  
+
   // Detect potential links in text
   useEffect(() => {
     if (!text || !allDocuments || !enabled) {
       setPotentialLinks([]);
       return;
     }
-    
+
     // Find matching document titles in the text
     const matches = allDocuments
-      .filter(doc => doc.title.length > 3) // Ignore very short titles
-      .filter(doc => text.toLowerCase().includes(doc.title.toLowerCase()))
-      .map(doc => doc.title);
-    
+      .filter((doc) => doc.title.length > 3) // Ignore very short titles
+      .filter((doc) => text.toLowerCase().includes(doc.title.toLowerCase()))
+      .map((doc) => doc.title);
+
     // Also detect capitalized words that might be proper nouns (potential document titles)
     const words = text.split(/\s+/);
     const potentialTitles = words
-      .filter(word => word.length > 3)
-      .filter(word => word[0] === word[0].toUpperCase())
-      .filter(word => !matches.some(match => match.includes(word)));
-    
+      .filter((word) => word.length > 3)
+      .filter((word) => word[0] === word[0].toUpperCase())
+      .filter((word) => !matches.some((match) => match.includes(word)));
+
     setPotentialLinks([...matches, ...potentialTitles]);
   }, [text, allDocuments, enabled]);
-  
+
   return potentialLinks;
-} 
+}
