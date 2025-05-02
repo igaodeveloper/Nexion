@@ -1,180 +1,188 @@
-import React, { useState, useEffect } from 'react';
-import { PageEditor, Page } from '@/components/editor/page-editor';
-import { Block } from '@/components/editor/block-editor';
-import { AppLayout } from '@/layouts/app-layout';
-import { useParams } from 'wouter';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useParams, useLocation } from 'wouter';
+import { Document } from '@shared/schema';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { TemplateGallery, Template } from '@/components/template-gallery';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import PageEditor, { Page } from '@/components/editor/page-editor';
+import TemplateGallery, { Template } from '@/components/template-gallery';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DocumentPage() {
-  const { id } = useParams();
-  const [isCreating, setIsCreating] = useState(!id);
-  const [showTemplateGallery, setShowTemplateGallery] = useState(!id);
-  const [currentPage, setCurrentPage] = useState<Page | null>(null);
+  const [, setLocation] = useLocation();
+  const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
+  const [showTemplateGallery, setShowTemplateGallery] = useState(false);
 
-  // Carregar página existente pelo ID
-  const { data: page, isLoading } = useQuery<Page>({
-    queryKey: [`/api/pages/${id}`],
+  // Fetch document if we have an ID
+  const { data: document, isLoading, error } = useQuery<Document>({
+    queryKey: id ? ['/api/documents', parseInt(id)] : null,
     enabled: !!id,
   });
 
-  useEffect(() => {
-    if (page) {
-      setCurrentPage(page);
-    }
-  }, [page]);
-
-  // Criar nova página (mock - em uma aplicação real, seria a API)
-  const createPageMutation = useMutation({
+  // Create new document mutation
+  const createMutation = useMutation({
     mutationFn: async (newPage: Page) => {
-      // Simulação de API - em um app real seria algo como:
-      // const response = await apiRequest("POST", "/api/pages", newPage);
-      // return response.json();
-      
-      // Mock de resposta
-      return {
-        ...newPage,
-        id: `page-${Date.now()}`,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      const response = await apiRequest('/api/documents', {
+        method: 'POST',
+        body: JSON.stringify(newPage),
+      });
+      return response.json();
     },
     onSuccess: (data) => {
-      setCurrentPage(data);
-      queryClient.invalidateQueries({ queryKey: ['/api/pages'] });
-      setIsCreating(false);
-    }
-  });
-  
-  // Atualizar página existente
-  const updatePageMutation = useMutation({
-    mutationFn: async (updatedPage: Page) => {
-      // Simulação de API - em um app real seria:
-      // const response = await apiRequest("PATCH", `/api/pages/${updatedPage.id}`, updatedPage);
-      // return response.json();
-      
-      // Mock de resposta
-      return {
-        ...updatedPage,
-        updatedAt: new Date()
-      };
+      toast({
+        title: 'Success',
+        description: 'Document created successfully!',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/documents'] });
+      setLocation(`/documents/${data.id}`);
     },
-    onSuccess: (data) => {
-      setCurrentPage(data);
-      queryClient.invalidateQueries({ queryKey: [`/api/pages/${id}`] });
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to create document',
+        variant: 'destructive',
+      });
     }
   });
 
-  // Manipulador para criar nova página a partir de um modelo
-  const handleSelectTemplate = (template: Template) => {
-    const initialBlocks: Block[] = [];
-    
-    // Adicionar blocos baseados no tipo de template
-    if (template.category === 'note') {
-      initialBlocks.push({
-        id: `block-${Date.now()}-1`,
-        type: 'paragraph',
-        content: '',
-        children: []
+  // Update existing document mutation
+  const updateMutation = useMutation({
+    mutationFn: async (updatedPage: Page) => {
+      const response = await apiRequest(`/api/documents/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(updatedPage),
       });
-    } else if (template.category === 'project') {
-      initialBlocks.push({
-        id: `block-${Date.now()}-1`,
-        type: 'heading-1',
-        content: 'Projeto',
-        children: []
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Document updated successfully!',
       });
-      initialBlocks.push({
-        id: `block-${Date.now()}-2`,
-        type: 'paragraph',
-        content: 'Descrição do projeto',
-        children: []
-      });
-      initialBlocks.push({
-        id: `block-${Date.now()}-3`,
-        type: 'to-do',
-        content: 'Tarefa a fazer',
-        completed: false,
-        children: []
+      queryClient.invalidateQueries({ queryKey: ['/api/documents', parseInt(id!)] });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to update document',
+        variant: 'destructive',
       });
     }
-    
+  });
+
+  const handleSelectTemplate = (template: Template) => {
+    // Create a new document based on selected template
     const newPage: Page = {
-      id: '', // será gerado pelo servidor
       title: template.title,
-      blocks: initialBlocks,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      blocks: [
+        {
+          id: `block-${Date.now()}-1`,
+          type: 'heading-1',
+          content: template.title,
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-2`,
+          type: 'paragraph',
+          content: template.description,
+          children: []
+        }
+      ],
+      emoji: '📄'
     };
     
-    createPageMutation.mutate(newPage);
+    createMutation.mutate(newPage);
     setShowTemplateGallery(false);
   };
-  
-  // Manipulador para atualizar a página atual
+
   const handleUpdatePage = (updatedPage: Page) => {
-    if (updatedPage.id) {
-      updatePageMutation.mutate(updatedPage);
+    if (id) {
+      updateMutation.mutate(updatedPage);
     } else {
-      createPageMutation.mutate(updatedPage);
+      createMutation.mutate(updatedPage);
     }
   };
 
-  if (isLoading) {
+  // If loading, show skeleton
+  if (id && isLoading) {
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex flex-col space-y-4 p-4">
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-12 w-1/2 mx-auto" />
+        <div className="space-y-2 max-w-4xl mx-auto w-full">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-3/4" />
         </div>
-      </AppLayout>
+      </div>
     );
   }
 
-  // Mostrar galeria de templates para criação de nova página
-  if (showTemplateGallery) {
+  // If error loading document, show error
+  if (id && error) {
     return (
-      <AppLayout>
-        <TemplateGallery onSelectTemplate={handleSelectTemplate} />
-      </AppLayout>
+      <div className="flex flex-col items-center justify-center h-[80vh] p-4">
+        <h1 className="text-2xl font-bold mb-4">Error loading document</h1>
+        <p className="text-muted-foreground mb-4">The document could not be loaded.</p>
+        <Button onClick={() => setLocation('/documents')}>Go Back</Button>
+      </div>
     );
   }
 
-  // Criar página vazia se não tivermos nem página nem template
-  if (!currentPage && !isCreating) {
+  // If no ID or document found, and we're not showing template gallery, create a new empty document
+  if (!id && !showTemplateGallery) {
     const emptyPage: Page = {
-      id: '',
-      title: 'Página sem título',
-      blocks: [{
-        id: `block-${Date.now()}`,
-        type: 'paragraph',
-        content: '',
-        children: []
-      }],
-      createdAt: new Date(),
-      updatedAt: new Date()
+      title: 'Untitled',
+      blocks: [
+        {
+          id: `block-${Date.now()}`,
+          type: 'paragraph',
+          content: '',
+          children: []
+        }
+      ]
     };
-    
+
     return (
-      <AppLayout>
-        <PageEditor page={emptyPage} onUpdate={handleUpdatePage} />
-      </AppLayout>
+      <div className="flex flex-col min-h-screen bg-background">
+        <div className="flex justify-end p-4 bg-muted/50">
+          <Button variant="outline" onClick={() => setShowTemplateGallery(true)}>
+            Choose Template
+          </Button>
+        </div>
+        <PageEditor
+          page={emptyPage}
+          onSave={handleUpdatePage}
+          isLoading={createMutation.isPending}
+        />
+      </div>
     );
   }
 
+  // If showing template gallery
+  if (showTemplateGallery) {
+    return <TemplateGallery onSelectTemplate={handleSelectTemplate} />;
+  }
+
+  // Otherwise, show the document editor
   return (
-    <AppLayout>
-      {currentPage && (
-        <PageEditor page={currentPage} onUpdate={handleUpdatePage} />
-      )}
-      
-      {/* Dialog de templates (pode ser aberto a partir do menu) */}
-      <Dialog open={showTemplateGallery} onOpenChange={setShowTemplateGallery}>
-        <DialogContent className="max-w-5xl">
-          <TemplateGallery onSelectTemplate={handleSelectTemplate} />
-        </DialogContent>
-      </Dialog>
-    </AppLayout>
+    <PageEditor
+      page={{
+        id: document?.id,
+        title: document?.title || 'Untitled',
+        blocks: document?.blocks ? JSON.parse(document.blocks as string) : [],
+        emoji: document?.emoji,
+        coverImage: document?.coverImage,
+        isFavorite: document?.isFavorite,
+        isStarred: document?.isStarred,
+        organizationId: document?.organizationId,
+        createdBy: document?.createdBy,
+        parentId: document?.parentId
+      }}
+      onSave={handleUpdatePage}
+      isLoading={updateMutation.isPending}
+    />
   );
 }

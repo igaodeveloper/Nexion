@@ -1,185 +1,282 @@
-import React, { useState, useEffect } from 'react';
-import { BlockEditor, Block, BlockType } from './block-editor';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import React, { useState, useRef } from 'react';
+import { Block } from '@shared/schema';
+import BlockEditor from './block-editor';
 import { Button } from '@/components/ui/button';
 import { 
-  Share2, 
-  MoreHorizontal, 
-  Star, 
-  Clock, 
-  Bookmark, 
-  FileText, 
-  Plus, 
-  Search 
+  SmileIcon, ImageIcon, StarIcon, HeartIcon, 
+  RefreshCw, MoreHorizontal 
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
-export interface Page {
-  id: string;
+export type Page = {
+  id?: number;
   title: string;
-  emoji?: string;
-  coverImage?: string;
-  icon?: string;
   blocks: Block[];
-  createdAt: Date;
-  updatedAt: Date;
-  starred?: boolean;
-  favorite?: boolean;
-}
+  emoji?: string | null;
+  coverImage?: string | null;
+  isFavorite?: boolean | null;
+  isStarred?: boolean | null;
+  createdBy?: number;
+  organizationId?: number;
+  icon?: string | null;
+  parentId?: number | null;
+};
 
 interface PageEditorProps {
   page: Page;
-  onUpdate: (page: Page) => void;
+  onSave: (page: Page) => void;
+  isLoading?: boolean;
+  readOnly?: boolean;
 }
 
-export function PageEditor({ page, onUpdate }: PageEditorProps) {
-  const [blocks, setBlocks] = useState<Block[]>([]);
-  const [title, setTitle] = useState(page.title);
-  const [isStarred, setIsStarred] = useState(page.starred || false);
-  const [isFavorite, setIsFavorite] = useState(page.favorite || false);
-
-  useEffect(() => {
-    // Se não houver blocos, inicialize com um bloco padrão
-    if (page.blocks.length === 0) {
-      const initialBlocks: Block[] = [
-        {
-          id: `block-${Date.now()}`,
-          type: 'paragraph',
-          content: '',
-          children: []
-        }
-      ];
-      setBlocks(initialBlocks);
-      onUpdate({ ...page, blocks: initialBlocks });
-    } else {
-      setBlocks(page.blocks);
-    }
-  }, [page.id]);
+export function PageEditor({ page, onSave, isLoading = false, readOnly = false }: PageEditorProps) {
+  const [currentPage, setCurrentPage] = useState<Page>(page);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
-    onUpdate({ ...page, title: newTitle });
+    setCurrentPage(prev => ({ ...prev, title: e.target.value }));
   };
 
-  const handleBlocksChange = (newBlocks: Block[]) => {
-    setBlocks(newBlocks);
-    onUpdate({ ...page, blocks: newBlocks });
+  const handleBlocksChange = (blocks: Block[]) => {
+    setCurrentPage(prev => ({ ...prev, blocks }));
+  };
+
+  const handleSave = () => {
+    if (!isLoading) {
+      onSave(currentPage);
+    }
   };
 
   const toggleStar = () => {
-    setIsStarred(!isStarred);
-    onUpdate({ ...page, starred: !isStarred });
+    if (readOnly) return;
+    setCurrentPage(prev => ({
+      ...prev,
+      isStarred: !prev.isStarred
+    }));
   };
 
   const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    onUpdate({ ...page, favorite: !isFavorite });
+    if (readOnly) return;
+    setCurrentPage(prev => ({
+      ...prev,
+      isFavorite: !prev.isFavorite
+    }));
   };
 
-  const addCoverImage = () => {
-    // Em um app real, abriria um seletor de imagem
-    const fakeCoverUrl = 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809';
-    onUpdate({ ...page, coverImage: fakeCoverUrl });
+  const handleEmojiChange = (emoji: string) => {
+    setCurrentPage(prev => ({
+      ...prev,
+      emoji
+    }));
+    setShowEmojiPicker(false);
   };
 
-  const addIcon = () => {
-    // Em um app real, abriria um seletor de emojis
-    onUpdate({ ...page, emoji: '📝' });
+  const sampleEmojis = ['📝', '✅', '📊', '🎯', '💡', '🚀', '🎨', '🔍', '📌', '📚'];
+
+  const handleChangeCoverImage = (url: string) => {
+    setCurrentPage(prev => ({
+      ...prev,
+      coverImage: url
+    }));
   };
+
+  // Unsplash sample cover images
+  const coverImageOptions = [
+    'https://images.unsplash.com/photo-1579546929518-9e396f3cc809',
+    'https://images.unsplash.com/photo-1589395937772-f67057e233b8',
+    'https://images.unsplash.com/photo-1584270413639-d5ee397272cd',
+    'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2',
+    'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d',
+    'https://images.unsplash.com/photo-1542831371-29b0f74f9713'
+  ];
 
   return (
-    <div className="page-editor w-full max-w-5xl mx-auto">
-      {/* Imagem de capa */}
-      {page.coverImage && (
-        <div 
-          className="cover-image h-40 w-full bg-cover bg-center rounded-t-lg"
-          style={{ backgroundImage: `url(${page.coverImage})` }}
-        />
+    <div className="flex flex-col min-h-screen bg-background">
+      {/* Cover Image */}
+      {currentPage.coverImage ? (
+        <div className="relative h-48 md:h-64 w-full overflow-hidden">
+          <img
+            src={currentPage.coverImage}
+            alt="Cover"
+            className="w-full h-full object-cover"
+          />
+          {!readOnly && (
+            <div className="absolute bottom-3 right-3 flex space-x-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="secondary" size="sm">
+                    <ImageIcon className="mr-2 h-4 w-4" />
+                    Change Cover
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 grid grid-cols-2 gap-1 p-1">
+                  {coverImageOptions.map((url, index) => (
+                    <div 
+                      key={index} 
+                      className="relative h-16 cursor-pointer rounded-md overflow-hidden"
+                      onClick={() => handleChangeCoverImage(url)}
+                    >
+                      <img src={url} alt={`Cover option ${index}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                  <DropdownMenuItem className="col-span-2 justify-center text-center">
+                    Remove Cover
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+        </div>
+      ) : !readOnly && (
+        <div className="flex justify-end p-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                <ImageIcon className="mr-2 h-4 w-4" />
+                Add Cover
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 grid grid-cols-2 gap-1 p-1">
+              {coverImageOptions.map((url, index) => (
+                <div 
+                  key={index} 
+                  className="relative h-16 cursor-pointer rounded-md overflow-hidden"
+                  onClick={() => handleChangeCoverImage(url)}
+                >
+                  <img src={url} alt={`Cover option ${index}`} className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )}
 
-      {/* Barra de ferramentas */}
-      <div className="toolbar flex justify-between items-center py-2 px-4 border-b">
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" onClick={() => {}} className="text-gray-500">
-            <Clock className="h-4 w-4 mr-1" />
-            Atualizado {new Date(page.updatedAt).toLocaleDateString()}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={toggleStar} className={isStarred ? "text-yellow-500" : "text-gray-500"}>
-            <Star className="h-4 w-4 mr-1" />
-            {isStarred ? "Marcado" : "Marcar com estrela"}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={toggleFavorite} className={isFavorite ? "text-blue-500" : "text-gray-500"}>
-            <Bookmark className="h-4 w-4 mr-1" />
-            {isFavorite ? "Favorito" : "Adicionar aos favoritos"}
-          </Button>
+      <div className="flex flex-1 flex-col items-center mx-auto w-full max-w-4xl px-4">
+        {/* Title & Emoji Row */}
+        <div className="flex items-center space-x-2 w-full mt-8 mb-4">
+          <div className="relative">
+            {currentPage.emoji ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "text-3xl md:text-5xl h-10 w-10 md:h-12 md:w-12 rounded-lg",
+                  readOnly ? "cursor-default" : "cursor-pointer"
+                )}
+                onClick={() => !readOnly && setShowEmojiPicker(true)}
+                disabled={readOnly}
+              >
+                <span>{currentPage.emoji}</span>
+              </Button>
+            ) : !readOnly && (
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-10 md:h-12 w-10 md:w-12 rounded-lg"
+                onClick={() => setShowEmojiPicker(true)}
+              >
+                <SmileIcon className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            )}
+
+            {showEmojiPicker && (
+              <div className="absolute z-10 top-full left-0 mt-1 bg-popover border rounded-md shadow-md p-2 grid grid-cols-5 gap-1">
+                {sampleEmojis.map(emoji => (
+                  <Button
+                    key={emoji}
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-xl"
+                    onClick={() => handleEmojiChange(emoji)}
+                  >
+                    {emoji}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1">
+            <Input
+              ref={titleRef}
+              value={currentPage.title}
+              onChange={handleTitleChange}
+              className="border-none text-2xl md:text-4xl font-bold bg-transparent px-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+              placeholder="Untitled"
+              readOnly={readOnly}
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            {!readOnly && (
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleSave}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <span className="text-xs">Save</span>
+                )}
+              </Button>
+            )}
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className={currentPage.isStarred ? "text-yellow-500" : "text-muted-foreground"}
+              onClick={toggleStar}
+              disabled={readOnly}
+            >
+              <StarIcon className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className={currentPage.isFavorite ? "text-rose-500" : "text-muted-foreground"}
+              onClick={toggleFavorite}
+              disabled={readOnly}
+            >
+              <HeartIcon className="h-4 w-4" />
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>Export</DropdownMenuItem>
+                <DropdownMenuItem>Share</DropdownMenuItem>
+                {!readOnly && <DropdownMenuItem>Delete</DropdownMenuItem>}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="text-gray-500">
-            <Share2 className="h-4 w-4 mr-1" />
-            Compartilhar
-          </Button>
-          
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-gray-500">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-56">
-              <div className="grid gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex justify-start"
-                  onClick={addCoverImage}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Adicionar Capa
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex justify-start"
-                  onClick={addIcon}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Ícone
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex justify-start"
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Pesquisar na página
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-
-      {/* Título e ícone da página */}
-      <div className="page-header px-12 py-8">
-        <div className="flex items-center mb-4">
-          {page.emoji && (
-            <div className="emoji text-4xl mr-3">{page.emoji}</div>
-          )}
-          <input
-            type="text"
-            value={title}
-            onChange={handleTitleChange}
-            placeholder="Página sem título"
-            className="text-4xl font-bold px-0 border-none bg-transparent focus:outline-none focus:ring-0 w-full"
+        {/* Editor */}
+        <div className="w-full mb-16">
+          <BlockEditor 
+            blocks={currentPage.blocks} 
+            onChange={handleBlocksChange}
+            readOnly={readOnly}
           />
         </div>
-      </div>
-
-      {/* Editor de blocos */}
-      <div className="px-12 pb-24">
-        <BlockEditor blocks={blocks} onChange={handleBlocksChange} />
       </div>
     </div>
   );
 }
+
+export default PageEditor;

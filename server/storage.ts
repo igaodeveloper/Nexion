@@ -551,7 +551,13 @@ export class MemStorage implements IStorage {
 
   async createTaskUpdate(update: InsertTaskUpdate): Promise<TaskUpdate> {
     const id = this.updateIdCounter++;
-    const newUpdate: TaskUpdate = { ...update, id };
+    const newUpdate: TaskUpdate = { 
+      ...update, 
+      id,
+      timestamp: update.timestamp || new Date(),
+      oldStatus: update.oldStatus || null,
+      newStatus: update.newStatus || null
+    };
     this.taskUpdates.set(id, newUpdate);
     return newUpdate;
   }
@@ -598,9 +604,15 @@ export class MemStorage implements IStorage {
     const newDocument: Document = { 
       ...document, 
       id,
-      // Ensure dates are Date objects
+      // Ensure all required fields are set
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      isFavorite: document.isFavorite !== undefined ? document.isFavorite : null,
+      isStarred: document.isStarred !== undefined ? document.isStarred : null,
+      emoji: document.emoji || null,
+      coverImage: document.coverImage || null,
+      icon: document.icon || null,
+      parentId: document.parentId || null
     };
     this.documents.set(id, newDocument);
     return newDocument;
