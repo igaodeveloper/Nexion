@@ -4,7 +4,7 @@ import { Document } from '@shared/schema';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import PageEditor, { Page } from '@/components/editor/page-editor';
-import TemplateGallery, { Template } from '@/components/template-gallery';
+import { TemplateGallery, Template } from '@/components/template-gallery';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -17,18 +17,15 @@ export default function DocumentPage() {
 
   // Fetch document if we have an ID
   const { data: document, isLoading, error } = useQuery<Document>({
-    queryKey: id ? ['/api/documents', parseInt(id)] : null,
+    queryKey: id ? ['/api/documents', parseInt(id)] : [],
     enabled: !!id,
   });
 
   // Create new document mutation
   const createMutation = useMutation({
     mutationFn: async (newPage: Page) => {
-      const response = await apiRequest('/api/documents', {
-        method: 'POST',
-        body: JSON.stringify(newPage),
-      });
-      return response.json();
+      const response = await apiRequest('POST', '/api/documents', newPage);
+      return await response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -50,11 +47,7 @@ export default function DocumentPage() {
   // Update existing document mutation
   const updateMutation = useMutation({
     mutationFn: async (updatedPage: Page) => {
-      const response = await apiRequest(`/api/documents/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(updatedPage),
-      });
-      return response.json();
+      return await apiRequest(`/api/documents/${id}`, 'PATCH', updatedPage);
     },
     onSuccess: () => {
       toast({

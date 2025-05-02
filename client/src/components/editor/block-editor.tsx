@@ -372,13 +372,15 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({ blocks, onChange, read
         '--placeholder-color': 'rgba(142, 142, 160, 0.5)'
       } as React.CSSProperties}
     >
-      <style jsx global>{`
-        [contenteditable][data-placeholder]:empty:before {
-          content: attr(data-placeholder);
-          color: var(--placeholder-color);
-          font-style: italic;
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          [contenteditable][data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: var(--placeholder-color);
+            font-style: italic;
+          }
+        `
+      }} />
       
       {blocks.length === 0 && !readOnly ? (
         <div 
