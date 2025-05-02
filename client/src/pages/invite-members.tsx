@@ -113,7 +113,7 @@ export default function InviteMembersPage() {
         <div className="flex space-x-2">
           <Button
             type="submit"
-            className="flex-1"
+            className="flex-1 bg-[#FF3BA5] hover:bg-[#FF559F] text-white"
             disabled={inviteMembersMutation.isPending}
           >
             {inviteMembersMutation.isPending ? "Enviando..." : "Continuar"}
@@ -122,7 +122,7 @@ export default function InviteMembersPage() {
           <Button
             type="button"
             variant="outline"
-            className="flex-1"
+            className="flex-1 border-[#FF87D4] text-[#FF3BA5] hover:bg-pink-50"
             onClick={skipStep}
           >
             Pular

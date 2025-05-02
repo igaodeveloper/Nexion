@@ -89,7 +89,7 @@ export default function LoginPage() {
         
         <Button
           type="submit"
-          className="w-full"
+          className="w-full bg-[#FF3BA5] hover:bg-[#FF559F] text-white"
           disabled={loginMutation.isPending}
         >
           {loginMutation.isPending ? "Fazendo login..." : "Login"}

@@ -79,7 +79,7 @@ export default function OrganizationSetupPage() {
         
         <Button
           type="submit"
-          className="w-full"
+          className="w-full bg-[#FF3BA5] hover:bg-[#FF559F] text-white"
           disabled={createOrgMutation.isPending}
         >
           {createOrgMutation.isPending ? "Criando..." : "Continuar"}

@@ -147,7 +147,7 @@ export default function RegisterPage() {
         
         <Button
           type="submit"
-          className="w-full"
+          className="w-full bg-[#FF3BA5] hover:bg-[#FF559F] text-white"
           disabled={registerMutation.isPending}
         >
           {registerMutation.isPending ? "Registrando..." : "Sign Up"}
@@ -155,9 +155,9 @@ export default function RegisterPage() {
       </form>
       
       <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">Já tem conta no Friday Flow?</p>
-        <Link href="/login">
-          <a className="text-primary hover:underline font-medium">Login</a>
+        <p className="text-sm text-gray-600">Já tem conta no NotionFlow?</p>
+        <Link href="/login" className="text-primary hover:underline font-medium">
+          Login
         </Link>
       </div>
     </AuthLayout>
