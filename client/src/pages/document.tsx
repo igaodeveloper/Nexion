@@ -47,7 +47,8 @@ export default function DocumentPage() {
   // Update existing document mutation
   const updateMutation = useMutation({
     mutationFn: async (updatedPage: Page) => {
-      return await apiRequest(`/api/documents/${id}`, 'PATCH', updatedPage);
+      const response = await apiRequest('PATCH', `/api/documents/${id}`, updatedPage);
+      return await response.json();
     },
     onSuccess: () => {
       toast({
