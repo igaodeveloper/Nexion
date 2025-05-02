@@ -335,7 +335,11 @@ export class MemStorage implements IStorage {
 
   async createUser(user: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const newUser: User = { ...user, id };
+    const newUser: User = { 
+      ...user, 
+      id,
+      phone: user.phone || null 
+    };
     this.users.set(id, newUser);
     return newUser;
   }
@@ -365,7 +369,11 @@ export class MemStorage implements IStorage {
 
   async createOrganization(org: InsertOrganization): Promise<Organization> {
     const id = this.orgIdCounter++;
-    const organization: Organization = { ...org, id };
+    const organization: Organization = { 
+      ...org, 
+      id,
+      description: org.description || null
+    };
     this.organizations.set(id, organization);
     return organization;
   }
@@ -383,7 +391,11 @@ export class MemStorage implements IStorage {
 
   async addOrganizationMember(member: InsertOrganizationMember): Promise<OrganizationMember> {
     const id = this.memberIdCounter++;
-    const newMember: OrganizationMember = { ...member, id };
+    const newMember: OrganizationMember = { 
+      ...member, 
+      id,
+      role: member.role || 'member'
+    };
     this.organizationMembers.set(id, newMember);
     return newMember;
   }
@@ -419,7 +431,11 @@ export class MemStorage implements IStorage {
 
   async createBoard(board: InsertBoard): Promise<Board> {
     const id = this.boardIdCounter++;
-    const newBoard: Board = { ...board, id };
+    const newBoard: Board = { 
+      ...board, 
+      id,
+      isFavorite: board.isFavorite !== undefined ? board.isFavorite : null
+    };
     this.boards.set(id, newBoard);
     return newBoard;
   }
@@ -450,7 +466,17 @@ export class MemStorage implements IStorage {
 
   async createTask(task: InsertTask): Promise<Task> {
     const id = this.taskIdCounter++;
-    const newTask: Task = { ...task, id };
+    const newTask: Task = { 
+      ...task, 
+      id,
+      status: task.status || 'todo',
+      description: task.description || null,
+      priority: task.priority || 'medium',
+      assignedTo: task.assignedTo || null,
+      projectId: task.projectId || null,
+      dueDate: task.dueDate || null,
+      completed: task.completed || null
+    };
     this.tasks.set(id, newTask);
     return newTask;
   }
@@ -495,7 +521,13 @@ export class MemStorage implements IStorage {
   // Session operations
   async createSession(session: InsertSession): Promise<Session> {
     const id = this.sessionIdCounter++;
-    const newSession: Session = { ...session, id };
+    const newSession: Session = { 
+      ...session, 
+      id,
+      location: session.location || null,
+      ipAddress: session.ipAddress || null,
+      timestamp: session.timestamp || new Date()
+    };
     this.sessions.set(id, newSession);
     return newSession;
   }

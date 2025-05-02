@@ -7,7 +7,8 @@ import {
   insertOrganizationSchema, 
   inviteMemberSchema,
   insertBoardSchema,
-  insertTaskSchema
+  insertTaskSchema,
+  Document
 } from "@shared/schema";
 import { z } from "zod";
 import session from "express-session";
@@ -366,6 +367,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessions = await storage.getSessionsByUser(req.session.userId!);
       res.status(200).json(sessions);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  // Document routes
+  app.get("/api/documents", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const documents = await storage.getDocumentsByUser(userId);
+      res.status(200).json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.get("/api/documents/favorites", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const documents = await storage.getFavoriteDocuments(userId);
+      res.status(200).json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.get("/api/documents/starred", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const documents = await storage.getStarredDocuments(userId);
+      res.status(200).json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.get("/api/documents/:id", requireAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const document = await storage.getDocument(id);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Parse the blocks from JSON string to object
+      const documentWithParsedBlocks = {
+        ...document,
+        blocks: JSON.parse(document.blocks as unknown as string)
+      };
+      
+      res.status(200).json(documentWithParsedBlocks);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.post("/api/documents", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      
+      // Convert blocks object to JSON string for storage
+      const document = {
+        ...req.body,
+        createdBy: userId,
+        blocks: JSON.stringify(req.body.blocks)
+      };
+      
+      const newDocument = await storage.createDocument(document);
+      
+      // Return with parsed blocks
+      const responseDocument = {
+        ...newDocument,
+        blocks: JSON.parse(newDocument.blocks as unknown as string)
+      };
+      
+      res.status(201).json(responseDocument);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+  
+  app.patch("/api/documents/:id", requireAuth, async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const document = await storage.getDocument(id);
+      
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // If blocks are being updated, convert to JSON string
+      const updates: Partial<Document> = { ...req.body };
+      if (updates.blocks) {
+        updates.blocks = JSON.stringify(updates.blocks);
+      }
+      
+      const updatedDocument = await storage.updateDocument(id, updates);
+      
+      // Return with parsed blocks
+      const responseDocument = {
+        ...updatedDocument,
+        blocks: JSON.parse(updatedDocument!.blocks as unknown as string)
+      };
+      
+      res.status(200).json(responseDocument);
     } catch (error) {
       res.status(500).json({ message: "Server error" });
     }
