@@ -7,12 +7,15 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-stripes">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-        <div className="flex justify-center mb-6">
-          <Logo />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+      <div className="w-full max-w-[420px] p-10 bg-background rounded-xl">
+        <div className="flex justify-center mb-8">
+          <Logo size="lg" variant="full" />
         </div>
         {children}
+      </div>
+      <div className="mt-8 text-sm text-muted-foreground">
+        <p>&copy; {new Date().getFullYear()} Nexion. All rights reserved.</p>
       </div>
     </div>
   );

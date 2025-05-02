@@ -1,9 +1,10 @@
 interface LogoProps {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   variant?: "full" | "icon";
+  theme?: "light" | "dark";
 }
 
-export function Logo({ size = "md", variant = "full" }: LogoProps) {
+export function Logo({ size = "md", variant = "full", theme = "light" }: LogoProps) {
   const sizes = {
     sm: {
       icon: 24,
@@ -17,8 +18,28 @@ export function Logo({ size = "md", variant = "full" }: LogoProps) {
       icon: 48,
       text: "text-2xl"
     },
+    xl: {
+      icon: 64,
+      text: "text-3xl"
+    }
   };
 
+  const themeColors = {
+    light: {
+      primary: "#6366F1", // Indigo primary
+      secondary: "#A5B4FC", // Lighter indigo
+      accent: "#4F46E5", // Deeper indigo
+      text: "#4338CA" // Indigo text
+    },
+    dark: {
+      primary: "#818CF8", // Lighter indigo for dark theme
+      secondary: "#6366F1", // Indigo for dark theme
+      accent: "#4F46E5", // Deeper indigo
+      text: "#A5B4FC" // Light indigo text for dark theme
+    }
+  };
+
+  const colors = themeColors[theme];
   const iconWidth = sizes[size].icon;
   const iconHeight = sizes[size].icon;
   
@@ -31,37 +52,42 @@ export function Logo({ size = "md", variant = "full" }: LogoProps) {
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
+          className="drop-shadow-sm"
         >
-          {/* Background shape - Notion style block */}
-          <rect x="10" y="10" width="80" height="80" rx="15" fill="#FF87D4" />
-          
-          {/* Center geometric pattern - Affine style */}
+          {/* Hexagonal base */}
           <path 
-            d="M30 30 L70 30 L70 70 L30 70 Z" 
-            fill="#FFFFFF" 
+            d="M50 5L90 28V72L50 95L10 72V28L50 5Z" 
+            fill={colors.primary} 
+          />
+          
+          {/* Inner geometric element */}
+          <path 
+            d="M50 20L75 35V65L50 80L25 65V35L50 20Z" 
+            fill="white" 
             fillOpacity="0.9"
           />
           
-          {/* Abstract lines - Affine style */}
+          {/* N letter stylized */}
           <path 
-            d="M35 40 L65 40 M35 50 L65 50 M35 60 L65 60" 
-            stroke="#FF3BA5" 
-            strokeWidth="3" 
-            strokeLinecap="round"
+            d="M40 40V60L60 40V60" 
+            stroke={colors.accent} 
+            strokeWidth="6" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
           />
           
-          {/* Dot elements - Notion style */}
-          <circle cx="30" cy="30" r="3" fill="#FF3BA5" />
-          <circle cx="70" cy="30" r="3" fill="#FF3BA5" />
-          <circle cx="30" cy="70" r="3" fill="#FF3BA5" />
-          <circle cx="70" cy="70" r="3" fill="#FF3BA5" />
+          {/* Connection dots */}
+          <circle cx="33" cy="33" r="3" fill={colors.secondary} />
+          <circle cx="67" cy="33" r="3" fill={colors.secondary} />
+          <circle cx="33" cy="67" r="3" fill={colors.secondary} />
+          <circle cx="67" cy="67" r="3" fill={colors.secondary} />
         </svg>
       </div>
       
       {variant === "full" && (
         <span 
-          className={`font-semibold ${sizes[size].text}`}
-          style={{ color: "#FF3BA5" }}
+          className={`font-bold tracking-tight ${sizes[size].text}`}
+          style={{ color: colors.text }}
         >
           Nexion
         </span>

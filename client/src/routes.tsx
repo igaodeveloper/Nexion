@@ -9,6 +9,10 @@ import Board from "@/pages/board";
 import DetailedBoard from "@/pages/detailed-board";
 import Profile from "@/pages/profile";
 import Document from "@/pages/document";
+import Calendar from "@/pages/calendar";
+import Team from "@/pages/team";
+import Reports from "@/pages/reports";
+import Messages from "@/pages/messages";
 import NotFound from "@/pages/not-found";
 
 interface PrivateRouteProps {
@@ -46,6 +50,12 @@ export function AppRoutes() {
       <PrivateRoute path="/profile" component={Profile} />
       <PrivateRoute path="/documents" component={Document} />
       <PrivateRoute path="/documents/:id" component={Document} />
+      <PrivateRoute path="/calendar" component={Calendar} />
+      <PrivateRoute path="/team" component={Team} />
+      <PrivateRoute path="/reports" component={Reports} />
+      <PrivateRoute path="/messages" component={Messages} />
+      <PrivateRoute path="/workspace/:name" component={Dashboard} />
+      <PrivateRoute path="/create-workspace" component={OrganizationSetup} />
 
       {/* Fallback */}
       <Route component={NotFound} />
