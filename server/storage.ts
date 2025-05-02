@@ -6,7 +6,8 @@ import {
   Task, InsertTask, 
   Project, InsertProject, 
   Session, InsertSession,
-  TaskUpdate, InsertTaskUpdate
+  TaskUpdate, InsertTaskUpdate,
+  Document, InsertDocument
 } from "@shared/schema";
 
 export interface IStorage {
@@ -73,6 +74,7 @@ export class MemStorage implements IStorage {
   private projects: Map<number, Project>;
   private sessions: Map<number, Session>;
   private taskUpdates: Map<number, TaskUpdate>;
+  private documents: Map<number, Document>;
   
   private userIdCounter: number;
   private orgIdCounter: number;
@@ -82,6 +84,7 @@ export class MemStorage implements IStorage {
   private projectIdCounter: number;
   private sessionIdCounter: number;
   private updateIdCounter: number;
+  private documentIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -92,6 +95,7 @@ export class MemStorage implements IStorage {
     this.projects = new Map();
     this.sessions = new Map();
     this.taskUpdates = new Map();
+    this.documents = new Map();
     
     this.userIdCounter = 1;
     this.orgIdCounter = 1;
@@ -101,6 +105,7 @@ export class MemStorage implements IStorage {
     this.projectIdCounter = 1;
     this.sessionIdCounter = 1;
     this.updateIdCounter = 1;
+    this.documentIdCounter = 1;
     
     // Initialize with some sample data
     this.initializeSampleData();
@@ -251,6 +256,68 @@ export class MemStorage implements IStorage {
     };
     
     this.sessions.set(session.id, session);
+    
+    // Create a sample document
+    const document: Document = {
+      id: this.documentIdCounter++,
+      title: "Bem-vindo ao NotionFlow",
+      emoji: "👋",
+      coverImage: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
+      icon: null,
+      blocks: JSON.stringify([
+        {
+          id: `block-${Date.now()}-1`,
+          type: "heading-1",
+          content: "Bem-vindo ao NotionFlow",
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-2`,
+          type: "paragraph",
+          content: "Este é um exemplo de documento usando nosso editor de blocos. Você pode editar este documento clicando em qualquer parte do texto.",
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-3`,
+          type: "heading-2",
+          content: "O que você pode fazer",
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-4`,
+          type: "bullet-list",
+          content: "Criar listas como esta",
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-5`,
+          type: "bullet-list",
+          content: "Adicionar vários tipos de blocos",
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-6`,
+          type: "bullet-list",
+          content: "Organizar seu conteúdo",
+          children: []
+        },
+        {
+          id: `block-${Date.now()}-7`,
+          type: "paragraph",
+          content: "Para adicionar um novo bloco, pressione Enter ou clique no botão '+' que aparece quando você passa o mouse sobre o espaço entre os blocos.",
+          children: []
+        }
+      ]),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: user.id,
+      organizationId: organization.id,
+      parentId: null,
+      isStarred: true,
+      isFavorite: true
+    };
+    
+    this.documents.set(document.id, document);
   }
 
   // User operations
@@ -455,6 +522,70 @@ export class MemStorage implements IStorage {
     const newUpdate: TaskUpdate = { ...update, id };
     this.taskUpdates.set(id, newUpdate);
     return newUpdate;
+  }
+
+  // Document operations
+  async getDocument(id: number): Promise<Document | undefined> {
+    return this.documents.get(id);
+  }
+
+  async getDocumentsByOrganization(orgId: number): Promise<Document[]> {
+    return Array.from(this.documents.values())
+      .filter(doc => doc.organizationId === orgId);
+  }
+
+  async getDocumentsByUser(userId: number): Promise<Document[]> {
+    // Get organizations the user is a member of
+    const orgIds = Array.from(this.organizationMembers.values())
+      .filter(member => member.userId === userId)
+      .map(member => member.organizationId);
+    
+    // Get documents for those organizations
+    return Array.from(this.documents.values())
+      .filter(doc => orgIds.includes(doc.organizationId));
+  }
+
+  async getFavoriteDocuments(userId: number): Promise<Document[]> {
+    // Get all documents the user has access to
+    const documents = await this.getDocumentsByUser(userId);
+    
+    // Filter to only favorite documents
+    return documents.filter(doc => doc.isFavorite);
+  }
+
+  async getStarredDocuments(userId: number): Promise<Document[]> {
+    // Get all documents the user has access to
+    const documents = await this.getDocumentsByUser(userId);
+    
+    // Filter to only starred documents
+    return documents.filter(doc => doc.isStarred);
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const id = this.documentIdCounter++;
+    const newDocument: Document = { 
+      ...document, 
+      id,
+      // Ensure dates are Date objects
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    this.documents.set(id, newDocument);
+    return newDocument;
+  }
+
+  async updateDocument(id: number, data: Partial<Document>): Promise<Document | undefined> {
+    const document = this.documents.get(id);
+    if (!document) return undefined;
+    
+    const updatedDocument = { 
+      ...document, 
+      ...data,
+      // Always update the updatedAt field
+      updatedAt: new Date()
+    };
+    this.documents.set(id, updatedDocument);
+    return updatedDocument;
   }
 }
 
