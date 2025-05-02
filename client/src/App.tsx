@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppRoutes } from "./routes";
 import { WelcomeScreen } from "@/components/welcome-screen";
 import { Router, useLocation } from "wouter";
+import { ZenModeProvider } from "./lib/zen-mode-provider";
 
 function App() {
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
@@ -28,14 +29,16 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        {showWelcomeScreen ? (
-          <WelcomeScreen onComplete={handleWelcomeComplete} />
-        ) : (
-          <AppRoutes />
-        )}
-      </TooltipProvider>
+      <ZenModeProvider>
+        <TooltipProvider>
+          <Toaster />
+          {showWelcomeScreen ? (
+            <WelcomeScreen onComplete={handleWelcomeComplete} />
+          ) : (
+            <AppRoutes />
+          )}
+        </TooltipProvider>
+      </ZenModeProvider>
     </QueryClientProvider>
   );
 }

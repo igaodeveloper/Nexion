@@ -170,3 +170,76 @@ export const documents = pgTable("documents", {
 export const insertDocumentSchema = createInsertSchema(documents).omit({ id: true });
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 export type Document = typeof documents.$inferSelect;
+
+// Interface for document version history
+export interface DocumentVersion {
+  id: number;
+  documentId: number;
+  blocks: string; // Serialized blocks content
+  title: string;
+  emoji?: string | null;
+  coverImage?: string | null;
+  createdAt: Date;
+  createdBy: number;
+  thumbnail?: string | null; // URL to a thumbnail preview
+  versionNumber: number;
+}
+
+// Interface for Document Comments
+export interface Comment {
+  id: number;
+  documentId: number;
+  text: string;
+  createdAt: Date;
+  createdBy: number;
+  parentId?: number | null;
+  resolved: boolean;
+}
+
+// Interface for Comment Reactions
+export interface CommentReaction {
+  id: number;
+  commentId: number;
+  userId: number;
+  emoji: string;
+  createdAt: Date;
+}
+
+// Interface for Custom Reaction Emojis
+export interface CustomReaction {
+  id: number;
+  organizationId: number;
+  emoji: string;
+  name: string;
+  createdBy: number;
+  createdAt: Date;
+}
+
+// Interface for Resource Vault
+export interface Resource {
+  id: number;
+  organizationId: number;
+  createdBy: number;
+  name: string;
+  type: 'image' | 'pdf' | 'audio' | 'video' | 'link' | 'other';
+  url: string;
+  fileSize?: number;
+  folderId?: number | null;
+  thumbnailUrl?: string | null;
+  description?: string | null;
+  tags?: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Interface for Resource Folders
+export interface ResourceFolder {
+  id: number;
+  organizationId: number;
+  createdBy: number;
+  name: string;
+  parentId?: number | null;
+  description?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}

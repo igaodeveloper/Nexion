@@ -29,9 +29,10 @@ import { Badge } from "@/components/ui/badge";
 
 interface SidebarProps {
   companyName: string;
+  className?: string;
 }
 
-export function Sidebar({ companyName }: SidebarProps) {
+export function Sidebar({ companyName, className }: SidebarProps) {
   const [location] = useLocation();
   const [openSection, setOpenSection] = useState<string>("workspaces");
   const [collapsed, setCollapsed] = useState(false);
@@ -70,7 +71,8 @@ export function Sidebar({ companyName }: SidebarProps) {
   const sidebarClass = cn(
     "h-screen fixed overflow-hidden z-10 transition-all duration-300 ease-in-out flex flex-col",
     collapsed ? "w-[70px]" : "w-[280px]",
-    "bg-sidebar text-sidebar-foreground border-r border-sidebar-border/30"
+    "bg-sidebar text-sidebar-foreground border-r border-sidebar-border/30",
+    className
   );
 
   const isActive = (path: string) => {

@@ -4,7 +4,7 @@ import BlockEditor from './block-editor';
 import { Button } from '@/components/ui/button';
 import { 
   SmileIcon, ImageIcon, StarIcon, HeartIcon, 
-  RefreshCw, MoreHorizontal 
+  RefreshCw, MoreHorizontal, Clock
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -14,6 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { TimeMachine } from './time-machine';
+import { DocumentVersion } from '@shared/schema';
+import { ZenModeToggle } from '@/components/zen-mode-toggle';
+import { useZenMode } from '@/lib/zen-mode-provider';
 
 export type Page = {
   id?: number;
@@ -40,6 +44,7 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
   const [currentPage, setCurrentPage] = useState<Page>(page);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const { zenMode } = useZenMode();
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentPage(prev => ({ ...prev, title: e.target.value }));
@@ -98,8 +103,24 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
     'https://images.unsplash.com/photo-1542831371-29b0f74f9713'
   ];
 
+  const handleRestoreVersion = (version: DocumentVersion) => {
+    const restoredPage = {
+      ...currentPage,
+      title: version.title,
+      emoji: version.emoji,
+      coverImage: version.coverImage,
+      blocks: JSON.parse(version.blocks),
+    };
+    
+    setCurrentPage(restoredPage);
+    onSave(restoredPage);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className={cn(
+      "flex flex-col min-h-screen bg-background",
+      zenMode && "zen-fullscreen"
+    )}>
       {/* Cover Image */}
       {currentPage.coverImage ? (
         <div className="relative h-48 md:h-64 w-full overflow-hidden">
@@ -217,59 +238,129 @@ export function PageEditor({ page, onSave, isLoading = false, readOnly = false }
 
           <div className="flex items-center space-x-2">
             {!readOnly && (
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleSave}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                ) : (
-                  <span className="text-xs">Save</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "flex items-center space-x-1",
+                  currentPage.isStarred ? "text-yellow-500 hover:text-yellow-600" : ""
                 )}
+                onClick={toggleStar}
+              >
+                <StarIcon className="h-4 w-4" />
+                <span>{currentPage.isStarred ? "Destacado" : "Destacar"}</span>
               </Button>
             )}
             
-            <Button
-              variant="ghost"
-              size="icon"
-              className={currentPage.isStarred ? "text-yellow-500" : "text-muted-foreground"}
-              onClick={toggleStar}
-              disabled={readOnly}
-            >
-              <StarIcon className="h-4 w-4" />
-            </Button>
+            {!readOnly && (
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "flex items-center space-x-1",
+                  currentPage.isFavorite ? "text-red-500 hover:text-red-600" : ""
+                )}
+                onClick={toggleFavorite}
+              >
+                <HeartIcon className="h-4 w-4" />
+                <span>{currentPage.isFavorite ? "Favorito" : "Favoritar"}</span>
+              </Button>
+            )}
             
-            <Button
-              variant="ghost"
-              size="icon"
-              className={currentPage.isFavorite ? "text-rose-500" : "text-muted-foreground"}
-              onClick={toggleFavorite}
-              disabled={readOnly}
-            >
-              <HeartIcon className="h-4 w-4" />
-            </Button>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>Export</DropdownMenuItem>
-                <DropdownMenuItem>Share</DropdownMenuItem>
-                {!readOnly && <DropdownMenuItem>Delete</DropdownMenuItem>}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Time Machine Button */}
+            {currentPage.id && (
+              <TimeMachine 
+                documentId={currentPage.id} 
+                currentPage={currentPage}
+                onRestore={handleRestoreVersion}
+              />
+            )}
           </div>
         </div>
         
-        {/* Editor */}
-        <div className="w-full mb-16">
+        {/* Action Buttons */}
+        <div className={cn(
+          "flex items-center justify-between w-full mb-6",
+          zenMode && "zen-hidden"
+        )}>
+          <div className="flex items-center space-x-2">
+            {!readOnly && (
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "flex items-center space-x-1",
+                  currentPage.isStarred ? "text-yellow-500 hover:text-yellow-600" : ""
+                )}
+                onClick={toggleStar}
+              >
+                <StarIcon className="h-4 w-4" />
+                <span>{currentPage.isStarred ? "Destacado" : "Destacar"}</span>
+              </Button>
+            )}
+            
+            {!readOnly && (
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "flex items-center space-x-1",
+                  currentPage.isFavorite ? "text-red-500 hover:text-red-600" : ""
+                )}
+                onClick={toggleFavorite}
+              >
+                <HeartIcon className="h-4 w-4" />
+                <span>{currentPage.isFavorite ? "Favorito" : "Favoritar"}</span>
+              </Button>
+            )}
+            
+            {/* Time Machine Button */}
+            {currentPage.id && (
+              <TimeMachine 
+                documentId={currentPage.id} 
+                currentPage={currentPage}
+                onRestore={handleRestoreVersion}
+              />
+            )}
+          </div>
+          
+          {!readOnly && (
+            <Button 
+              variant="default"
+              disabled={isLoading}
+              onClick={handleSave}
+              className="flex items-center space-x-1"
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Salvando...</span>
+                </>
+              ) : (
+                <>
+                  <span>Salvar</span>
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+
+        {/* Zen mode toggle button */}
+        <div className="w-full flex justify-end mb-4">
+          <ZenModeToggle showLabel />
+        </div>
+
+        {/* Zen mode exit button (only visible in zen mode) */}
+        {zenMode && (
+          <div className="zen-exit-button">
+            <ZenModeToggle variant="ghost" />
+          </div>
+        )}
+
+        {/* Document Blocks */}
+        <div className="w-full">
           <BlockEditor 
-            blocks={currentPage.blocks} 
+            blocks={currentPage.blocks}
             onChange={handleBlocksChange}
             readOnly={readOnly}
           />
