@@ -38,29 +38,43 @@ export function Sidebar({ companyName }: SidebarProps) {
         <ul className="space-y-1">
           <li>
             <Link href="/">
-              <a
+              <div
                 className={cn(
-                  "flex items-center px-4 py-2 text-sm hover:bg-gray-100 rounded-md",
+                  "flex items-center px-4 py-2 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
                   location === "/" && "bg-primary text-white hover:bg-primary/90"
                 )}
               >
                 <Home className="mr-3 h-4 w-4" />
                 <span>Página inicial</span>
-              </a>
+              </div>
             </Link>
           </li>
 
           <li>
             <Link href="/tasks">
-              <a
+              <div
                 className={cn(
-                  "flex items-center px-4 py-2 text-sm hover:bg-gray-100 rounded-md",
+                  "flex items-center px-4 py-2 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
                   location === "/tasks" && "bg-primary text-white hover:bg-primary/90"
                 )}
               >
                 <CheckSquare className="mr-3 h-4 w-4" />
                 <span>Atribuídos a mim</span>
-              </a>
+              </div>
+            </Link>
+          </li>
+          
+          <li>
+            <Link href="/documents">
+              <div
+                className={cn(
+                  "flex items-center px-4 py-2 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
+                  (location === "/documents" || location.startsWith("/documents/")) && "bg-primary text-white hover:bg-primary/90"
+                )}
+              >
+                <FileText className="mr-3 h-4 w-4" />
+                <span>Documentos</span>
+              </div>
             </Link>
           </li>
 
@@ -85,15 +99,15 @@ export function Sidebar({ companyName }: SidebarProps) {
                 {favoriteBoards?.map((board) => (
                   <li key={board.id}>
                     <Link href={`/boards/${board.id}`}>
-                      <a className={cn(
-                        "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md",
+                      <div className={cn(
+                        "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
                         location === `/boards/${board.id}` && "bg-gray-200"
                       )}>
                         <div className="flex items-center">
                           <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-primary mr-2"></span>
                           {board.name}
                         </div>
-                      </a>
+                      </div>
                     </Link>
                   </li>
                 ))}
@@ -124,41 +138,41 @@ export function Sidebar({ companyName }: SidebarProps) {
               <ul className="pl-10 mt-1 space-y-1">
                 <li>
                   <Link href="/boards/1">
-                    <a className={cn(
-                      "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md",
+                    <div className={cn(
+                      "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
                       location === "/boards/1" && "bg-gray-200"
                     )}>
                       <div className="flex items-center">
                         <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-primary mr-2"></span>
                         Quadro
                       </div>
-                    </a>
+                    </div>
                   </Link>
                 </li>
                 <li>
                   <Link href="/boards/2">
-                    <a className={cn(
-                      "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md",
+                    <div className={cn(
+                      "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
                       location === "/boards/2" && "bg-gray-200"
                     )}>
                       <div className="flex items-center">
                         <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-primary mr-2"></span>
                         Quadro
                       </div>
-                    </a>
+                    </div>
                   </Link>
                 </li>
                 <li>
                   <Link href="/boards/3">
-                    <a className={cn(
-                      "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md",
+                    <div className={cn(
+                      "block px-4 py-1.5 text-sm hover:bg-gray-100 rounded-md cursor-pointer",
                       location === "/boards/3" && "bg-gray-200"
                     )}>
                       <div className="flex items-center">
                         <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-primary mr-2"></span>
                         Quadro
                       </div>
-                    </a>
+                    </div>
                   </Link>
                 </li>
               </ul>
@@ -169,10 +183,10 @@ export function Sidebar({ companyName }: SidebarProps) {
 
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
         <Link href="/profile">
-          <a className="flex items-center text-sm text-gray-700 hover:text-primary">
+          <div className="flex items-center text-sm text-gray-700 hover:text-primary cursor-pointer">
             <Settings className="mr-3 h-4 w-4" />
             <span>Configurações</span>
-          </a>
+          </div>
         </Link>
       </div>
     </div>

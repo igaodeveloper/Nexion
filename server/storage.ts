@@ -41,6 +41,15 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, data: Partial<Task>): Promise<Task | undefined>;
   
+  // Document operations
+  getDocument(id: number): Promise<Document | undefined>;
+  getDocumentsByOrganization(orgId: number): Promise<Document[]>;
+  getDocumentsByUser(userId: number): Promise<Document[]>;
+  getFavoriteDocuments(userId: number): Promise<Document[]>;
+  getStarredDocuments(userId: number): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  updateDocument(id: number, data: Partial<Document>): Promise<Document | undefined>;
+  
   // Project operations
   getProject(id: number): Promise<Project | undefined>;
   getProjectsByOrganization(orgId: number): Promise<Project[]>;

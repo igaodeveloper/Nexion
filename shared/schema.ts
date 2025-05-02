@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -126,3 +126,47 @@ export const inviteMemberSchema = z.object({
 });
 
 export type InviteMemberData = z.infer<typeof inviteMemberSchema>;
+
+// Block schema (for documents)
+export const blockSchema: z.ZodType<any> = z.lazy(() => z.object({
+  id: z.string(),
+  type: z.enum([
+    'paragraph', 
+    'heading-1', 
+    'heading-2', 
+    'heading-3', 
+    'bullet-list', 
+    'numbered-list',
+    'to-do',
+    'table',
+    'image',
+    'calendar',
+    'file'
+  ]),
+  content: z.string(),
+  completed: z.boolean().optional(),
+  children: z.array(blockSchema).optional(),
+}));
+
+export type Block = z.infer<typeof blockSchema>;
+
+// Document model
+export const documents = pgTable("documents", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  emoji: text("emoji"),
+  coverImage: text("cover_image"),
+  icon: text("icon"),
+  blocks: jsonb("blocks").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdBy: integer("created_by").notNull(),
+  organizationId: integer("organization_id").notNull(),
+  parentId: integer("parent_id"),
+  isStarred: boolean("is_starred").default(false),
+  isFavorite: boolean("is_favorite").default(false),
+});
+
+export const insertDocumentSchema = createInsertSchema(documents).omit({ id: true });
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;
