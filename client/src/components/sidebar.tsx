@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, ChevronUp, Star, Briefcase, Home, CheckSquare, Settings } from "lucide-react";
+import { ChevronDown, ChevronUp, Star, Briefcase, Home, CheckSquare, Settings, FileText } from "lucide-react";
 import { Board } from "@shared/schema";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";

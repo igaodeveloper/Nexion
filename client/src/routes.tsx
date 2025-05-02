@@ -8,6 +8,7 @@ import InviteMembers from "@/pages/invite-members";
 import Board from "@/pages/board";
 import DetailedBoard from "@/pages/detailed-board";
 import Profile from "@/pages/profile";
+import Document from "@/pages/document";
 import NotFound from "@/pages/not-found";
 
 interface PrivateRouteProps {
@@ -43,6 +44,8 @@ export function AppRoutes() {
       <PrivateRoute path="/tasks" component={Board} />
       <PrivateRoute path="/boards/:id" component={DetailedBoard} />
       <PrivateRoute path="/profile" component={Profile} />
+      <PrivateRoute path="/documents" component={Document} />
+      <PrivateRoute path="/documents/:id" component={Document} />
 
       {/* Fallback */}
       <Route component={NotFound} />
