@@ -15,7 +15,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   });
   
   // Get the current organization name
-  const companyName = "Company Name"; // In a real app, would be dynamic based on user's org
+  const companyName = "Nexion"; // In a real app, would be dynamic based on user's org
 
   if (isLoading) {
     return <div className="h-screen w-full flex items-center justify-center bg-stripes">Loading...</div>;

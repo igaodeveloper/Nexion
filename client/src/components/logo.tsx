@@ -63,7 +63,7 @@ export function Logo({ size = "md", variant = "full" }: LogoProps) {
           className={`font-semibold ${sizes[size].text}`}
           style={{ color: "#FF3BA5" }}
         >
-          Notion<span style={{ color: "#FF87D4" }}>Flow</span>
+          Nexion
         </span>
       )}
     </div>
