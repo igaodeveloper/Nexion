@@ -13,11 +13,11 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 138 77% 16%;
+  --primary: 329 98% 61%;
   --primary-foreground: 60 9.1% 97.8%;
-  --secondary: 60 4.8% 95.9%;
+  --secondary: 326 100% 75%;
   --secondary-foreground: 24 9.8% 10%;
-  --accent: 60 4.8% 95.9%;
+  --accent: 326 100% 95%;
   --accent-foreground: 24 9.8% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
@@ -25,7 +25,7 @@
   --radius: 0.5rem;
   --sidebar-background: 0 0% 100%;
   --sidebar-foreground: 20 14.3% 4.1%;
-  --sidebar-primary: 138 77% 16%;
+  --sidebar-primary: 329 98% 61%;
   --sidebar-primary-foreground: 60 9.1% 97.8%;
   --sidebar-accent: 60 4.8% 95.9%;
   --sidebar-accent-foreground: 24 9.8% 10%;
@@ -50,18 +50,18 @@
   --card-foreground: 60 9.1% 97.8%;
   --border: 12 6.5% 15.1%;
   --input: 12 6.5% 15.1%;
-  --primary: 138 77% 16%;
+  --primary: 329 98% 61%;
   --primary-foreground: 60 9.1% 97.8%;
-  --secondary: 12 6.5% 15.1%;
+  --secondary: 326 100% 75%;
   --secondary-foreground: 60 9.1% 97.8%;
-  --accent: 12 6.5% 15.1%;
+  --accent: 326 100% 95%;
   --accent-foreground: 60 9.1% 97.8%;
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 60 9.1% 97.8%;
   --ring: 24 5.7% 82.9%;
   --sidebar-background: 20 14.3% 4.1%;
   --sidebar-foreground: 60 9.1% 97.8%;
-  --sidebar-primary: 138 77% 16%;
+  --sidebar-primary: 329 98% 61%;
   --sidebar-primary-foreground: 60 9.1% 97.8%;
   --sidebar-accent: 12 6.5% 15.1%;
   --sidebar-accent-foreground: 60 9.1% 97.8%;
@@ -81,12 +81,14 @@
 @layer components {
   .bg-stripes {
     background-image: repeating-linear-gradient(
-      90deg,
+      45deg,
       #FFFFFF,
-      #FFFFFF 20px,
-      #FFF0F5 20px,
-      #FFF0F5 40px
+      #FFFFFF 15px,
+      #FFF0F9 15px,
+      #FFF0F9 30px
     );
+    background-size: 100%;
+    background-position: center;
   }
   
   .priority-high {

@@ -82,8 +82,8 @@ export default function LoginPage() {
             <Label htmlFor="remember-me" className="text-sm">Lembrar-me</Label>
           </div>
           
-          <Link href="/forgot-password">
-            <a className="text-sm text-primary hover:underline">Esqueceu a senha?</a>
+          <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+            Esqueceu a senha?
           </Link>
         </div>
         
@@ -98,8 +98,8 @@ export default function LoginPage() {
       
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">Não tem uma conta?</p>
-        <Link href="/register">
-          <a className="text-primary hover:underline font-medium">Criar conta</a>
+        <Link href="/register" className="text-primary hover:underline font-medium">
+          Criar conta
         </Link>
       </div>
     </AuthLayout>
